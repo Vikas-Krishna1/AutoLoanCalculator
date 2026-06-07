@@ -1,4 +1,4 @@
-package src.ui;
+package src.ui.applicant;
 
 import src.db.DatabaseManager;
 import src.models.Applicant;
