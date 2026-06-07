@@ -1,0 +1,27 @@
+# Java
+*.class
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Build folders
+bin/
+out/
+target/
+
+# IntelliJ
+.idea/
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# Temporary files
+*.tmp
