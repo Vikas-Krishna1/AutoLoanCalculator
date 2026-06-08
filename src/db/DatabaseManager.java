@@ -104,10 +104,11 @@ public Applicant getApplicantByUserId(
 // ==========================
 public int saveApplicant(Applicant applicant) throws SQLException
 {
+
     String sql =
             "INSERT INTO applicant " +
             "(user_id,full_name, email, phone, address, date_of_birth, ssn, employer_name) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            "VALUES (?,?, ?, ?, ?, ?, ?, ?)";
 
     try (Connection conn = connect();
          PreparedStatement stmt =
@@ -116,13 +117,15 @@ public int saveApplicant(Applicant applicant) throws SQLException
                          Statement.RETURN_GENERATED_KEYS))
     {
         stmt.setInt(1, applicant.getUserId());
-        stmt.setString(1, applicant.getFullName());
-        stmt.setString(2, applicant.getEmail());
-        stmt.setString(3, applicant.getPhone());
-        stmt.setString(4, applicant.getAddress());
-        stmt.setString(5, applicant.getDateOfBirth());
-        stmt.setString(6, applicant.getSSN());
-        stmt.setString(7, applicant.getEmployerName());
+        stmt.setString(2, applicant.getFullName());
+        stmt.setString(3, applicant.getEmail());
+        stmt.setString(4, applicant.getPhone());
+        stmt.setString(5, applicant.getAddress());
+        stmt.setString(6, applicant.getDateOfBirth());
+        stmt.setString(7, applicant.getSSN());
+        stmt.setString(8, applicant.getEmployerName());
+        System.out.println("Applicant user_id = " + applicant.getUserId());
+        System.out.println("Applicant name = " + applicant.getFullName());
 
         stmt.executeUpdate();
 
@@ -191,8 +194,13 @@ public int saveLoanApplication(
         // First save applicant and vehicle to get their IDs
     try
     {
+        int applicantId = saveApplicant(applicant);
+
+        if(applicantId == -1)
+    {
+            throw new SQLException("Failed to save applicant");
+    }
        
-       int applicantId = applicant.getApplicantId();
         int vehicleId = saveVehicle(vehicle);
 
         double loanAmount =
@@ -365,7 +373,49 @@ public String getApplicationStatus(int applicationId)
 
     return null;
 }
+//Get all Applications===============
+//Retrieves a list of all loan applications from the database
+//Uses SQL prepared statements to query the database for all loan applications
+// and maps the results to a list of LoanApplication objects
+//Returns a list of all loan applications as LoanApplication objects
+//Handles SQL exceptions that may occur during the retrieval process and prints the 
+// stack trace for debugging
+// ==========================
+public List<LoanApplication> getAllApplications()
+{
+    List<LoanApplication> applications = new ArrayList<>();
 
+    String sql =
+            "SELECT application_id " +
+            "FROM loan_application";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql))
+    {
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next())
+        {
+            int applicationId =
+                    rs.getInt("application_id");
+
+            LoanApplication app =
+                    getLoanApplicationById(applicationId);
+
+            if (app != null)
+            {
+                applications.add(app);
+            }
+        }
+    }
+    //Error handling for SQL exceptions during the retrieval process
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return applications;
+}
 
 //================================================
 //Get Pending Applications================================
@@ -535,10 +585,10 @@ public boolean assignLoanOfficer(
         int applicationId,
         int loanOfficerId)
 {
-    String sql =
-            "UPDATE loan_application " +
-            "SET loan_officer_id=? " +
-            "WHERE application_id=?";
+   String sql =
+    "UPDATE loan_application " +
+    "SET reviewed_by=? " +
+    "WHERE application_id=?";
 
     try (Connection conn = connect();
          PreparedStatement stmt =

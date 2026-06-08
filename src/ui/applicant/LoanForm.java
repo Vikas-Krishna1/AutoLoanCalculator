@@ -13,6 +13,7 @@ import java.awt.*;
 public class LoanForm extends JFrame
 {
     // Applicant Fields
+    private int user_id ;
     private JTextField fullNameField;
     private JTextField emailField;
     private JTextField phoneField;
@@ -43,8 +44,9 @@ public class LoanForm extends JFrame
     private Vehicle currentVehicle;
     private AutoLoan currentLoan;
 
-    public LoanForm()
+    public LoanForm(int user_id)
     {
+        this.user_id = user_id;
         setTitle("Auto Loan Application");
         setSize(850, 850);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -252,7 +254,8 @@ public class LoanForm extends JFrame
         try
         {
             currentApplicant =
-                    new Applicant(      
+                    new Applicant(  
+                            user_id, 
                             fullNameField.getText(),
                             emailField.getText(),
                             phoneField.getText(),
@@ -260,6 +263,8 @@ public class LoanForm extends JFrame
                             dobField.getText(),
                             ssnField.getText(),
                             employerField.getText());
+System.out.println("Applicant user_id = " +
+                   currentApplicant.getUserId());
 
             currentVehicle =
                     new Vehicle(

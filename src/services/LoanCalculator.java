@@ -4,59 +4,97 @@ import src.models.AutoLoan;
 
 public class LoanCalculator
 {
-    // Loan amount after down payment and cash incentive
-    public static double calculateLoanAmount(AutoLoan loan)
+    // Amount financed (principal)
+    public static double calculateLoanAmount(
+            AutoLoan loan)
     {
-        double priceAfterIncentive =
-                loan.getAutoPrice() - loan.getCashIncentive();
+        double tax =
+                loan.getAutoPrice()
+                * (loan.getSalesTax() / 100.0);
 
-        double loanAmount =
-                priceAfterIncentive - loan.getDownPayment();
+        double amount =
+                loan.getAutoPrice()
+                + tax
+                + loan.getFees()
+                - loan.getCashIncentive()
+                - loan.getDownPayment();
 
-        return Math.max(0, loanAmount);
+        return Math.max(amount, 0);
     }
 
-    // Monthly payment using standard amortization formula
-    public static double calculateMonthlyPayment(AutoLoan loan)
+    // Monthly payment
+    public static double calculateMonthlyPayment(
+            AutoLoan loan)
     {
-        double loanAmount = calculateLoanAmount(loan);
+        double principal =
+                calculateLoanAmount(loan);
 
         double monthlyRate =
-                loan.getInterestRate() / 100.0 / 12.0;
+                loan.getInterestRate()
+                / 100.0
+                / 12.0;
 
         int numberOfPayments =
-                loan.getLoanTerm() * 12;
+                loan.getLoanTerm();   // already months
 
-        // If no interest
+        if (numberOfPayments <= 0)
+        {
+            return 0;
+        }
+
         if (monthlyRate == 0)
         {
-            return loanAmount / numberOfPayments;
+            return principal / numberOfPayments;
         }
 
         double denominator =
-                1 - Math.pow(1 + monthlyRate, -numberOfPayments);
+                1 - Math.pow(
+                        1 + monthlyRate,
+                        -numberOfPayments);
 
-        return loanAmount * monthlyRate / denominator;
+        return principal
+                * monthlyRate
+                / denominator;
     }
 
-    // Total upfront tax + fees (optional helper)
-    public static double calculateUpfrontCosts(AutoLoan loan)
+    // Sales tax amount
+    public static double calculateSalesTaxAmount(
+            AutoLoan loan)
     {
-        double taxAmount =
-                loan.getAutoPrice() * (loan.getSalesTax() / 100.0);
-
-        return taxAmount + loan.getFees();
+        return loan.getAutoPrice()
+                * (loan.getSalesTax() / 100.0);
     }
 
-    // Total cost of loan over time
-    public static double calculateTotalPayment(AutoLoan loan)
+    // Tax + fees
+    public static double calculateUpfrontCosts(
+            AutoLoan loan)
     {
-        double monthly =
-                calculateMonthlyPayment(loan);
+        return calculateSalesTaxAmount(loan)
+                + loan.getFees();
+    }
 
-        int months =
-                loan.getLoanTerm() * 12;
+    // Total amount paid over life of loan
+    public static double calculateTotalPayment(
+            AutoLoan loan)
+    {
+        return calculateMonthlyPayment(loan)
+                * loan.getLoanTerm();
+    }
 
-        return monthly * months;
+    // Interest paid over life of loan
+    public static double calculateTotalInterest(
+            AutoLoan loan)
+    {
+        return calculateTotalPayment(loan)
+                - calculateLoanAmount(loan);
+    }
+
+    // Vehicle price + tax + fees
+    public static double calculateOutTheDoorPrice(
+            AutoLoan loan)
+    {
+        return loan.getAutoPrice()
+                + calculateSalesTaxAmount(loan)
+                + loan.getFees();
     }
 }

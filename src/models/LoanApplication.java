@@ -3,16 +3,19 @@ public class LoanApplication
 {
     private int applicationId;
 
+    private String status;
     private Applicant applicant;
     private Vehicle vehicle;
     private AutoLoan loan;
 
     public LoanApplication(
+
             int applicationId,
             Applicant applicant,
             Vehicle vehicle,
             AutoLoan loan)
     {
+        this.status = "Pending";
         this.applicationId = applicationId;
         this.applicant = applicant;
         this.vehicle = vehicle;
@@ -20,6 +23,9 @@ public class LoanApplication
     }
 
     // getters
+    public String getStatus() {
+        return status;
+    }
     public int getApplicationId()
     {
         return applicationId;
@@ -59,6 +65,9 @@ public class LoanApplication
     {
         this.loan = loan;
     }
+    public void setStatus(String status) {
+        this.status = status;
+    }   
 
      @Override
     public String toString() {

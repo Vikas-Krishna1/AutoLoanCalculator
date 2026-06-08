@@ -317,4 +317,8 @@ public class LoanOfficerView extends JFrame
 
         currentApplication = null;
     }
+    public LoanOfficerView(int applicationId) {
+        this();
+        loadButton.doClick();
+    }
 }

@@ -40,6 +40,25 @@ public class Applicant
     this.ssn = ssn;
     this.employerName = employerName;
 }
+public Applicant(
+        int user_id,
+        String full_name,
+        String email,
+        String phone,
+        String address,
+        String dateOfBirth,
+        String ssn,
+        String employerName)
+{
+    this.user_id = user_id;
+    this.full_name = full_name;
+    this.email = email;
+    this.phone = phone;
+    this.address = address;
+    this.dateOfBirth = dateOfBirth;
+    this.ssn = ssn;
+    this.employerName = employerName;
+}
 
     //Getters
     public int getUserId() {
