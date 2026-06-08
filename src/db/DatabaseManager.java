@@ -1,32 +1,40 @@
 package src.db;
+// ==========================
+// Database Manager
+// ==========================
+// This class handles all database interactions, including saving and retrieving
+// applicant, vehicle, and loan application data. It uses JDBC to connect to a MySQL database and performs SQL operations securely with prepared statements. The class
+// includes methods to save applicants and vehicles,
+//  as well as to save and retrieve complete 
+// loan applications, ensuring that all related data is properly
+//  stored and retrieved.
+//=============================
+//Imports
 import src.models.Applicant;
 import src.models.Vehicle;
 import src.models.AutoLoan;
 import src.models.LoanApplication;
 import src.services.LoanCalculator;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 // ==========================
-// Database Manager
-// ==========================
-
 public class DatabaseManager
 {
 //DB connection details
 //URL format: jdbc:mysql://hostname:port/database_name
 //DB credentials-USER
-
+//URL
 private static final String URL =
         System.getenv("DB_URL");
 
-
+//USER
 private static final String USER =
         System.getenv("DB_USER");
-
+//PASSWORD
 private static final String PASSWORD =
         System.getenv("DB_PASSWORD");
+//Check if env variables are loaded correctly
 public void printEnvVariables()
 {
     System.out.println("URL = " + URL);
@@ -34,20 +42,71 @@ public void printEnvVariables()
     System.out.println("PASSWORD = " + PASSWORD);
 }
 
-
+// ==========================
+// Connect to Database
+// ==========================
 private Connection connect() throws SQLException
 {
     return DriverManager.getConnection(URL, USER, PASSWORD);
 }
+//APPICANT  SIDE METHODS=====================================================
+//Get applicnat form Applicant ID=========================
+//Retrieves an applicant's information from the database using their applicant ID
+//Uses SQL prepared statements to securely query the database for an applicant's information based on their ID
+//Returns an Applicant object containing the applicant's information
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging purposes
+//===================================
+public Applicant getApplicantByUserId(
+        int userId)
+{
+    String sql =
+            "SELECT * FROM applicant WHERE user_id=?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, userId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return new Applicant(
+                    rs.getInt("user_id"),
+                    rs.getInt("applicant_id"),
+                    rs.getString("full_name"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("address"),
+                    rs.getString("date_of_birth"),
+                    rs.getString("ssn"),
+                    rs.getString("employer_name")
+            );
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return null;
+}
 
 // ==========================
 // Save Applicant
+//Uses SQL prepared statements to securely insert applicant data into 
+// the database and retrieves the generated applicant ID
+//  for use in loan application records.
+//Uses smtmt.executeUpdate() to execute the insert and stmt.getGeneratedKeys() 
+// to get the new applicant ID.
 // ==========================
 public int saveApplicant(Applicant applicant) throws SQLException
 {
     String sql =
             "INSERT INTO applicant " +
-            "(full_name, email, phone, address, date_of_birth, ssn, employer_name) " +
+            "(user_id,full_name, email, phone, address, date_of_birth, ssn, employer_name) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     try (Connection conn = connect();
@@ -56,6 +115,7 @@ public int saveApplicant(Applicant applicant) throws SQLException
                          sql,
                          Statement.RETURN_GENERATED_KEYS))
     {
+        stmt.setInt(1, applicant.getUserId());
         stmt.setString(1, applicant.getFullName());
         stmt.setString(2, applicant.getEmail());
         stmt.setString(3, applicant.getPhone());
@@ -79,6 +139,11 @@ public int saveApplicant(Applicant applicant) throws SQLException
 
 // ==========================
 // Save Vehicle
+//Uses SQL prepared statements to securely insert vehicle data into 
+// the database and retrieves the generated vehicle ID
+//  for use in loan application records.
+//Uses smtmt.executeUpdate() to execute the insert and stmt.getGeneratedKeys() 
+// to get the new vehicle ID.
 // ==========================
 public int saveVehicle(Vehicle vehicle) throws SQLException
 {
@@ -112,16 +177,22 @@ public int saveVehicle(Vehicle vehicle) throws SQLException
 
 // ==========================
 // Save Loan Application
+//Uses SQL prepared statements to securely insert loan application data into 
+// the database and retrieves the generated loan application ID
+//  for use in loan application records.
+//Uses smtmt.executeUpdate() to execute the insert and stmt.getGeneratedKeys() 
+// to get the new loan application ID.
 // ==========================
 public int saveLoanApplication(
         Applicant applicant,
         Vehicle vehicle,
         AutoLoan loan)
 {
+        // First save applicant and vehicle to get their IDs
     try
     {
-        int applicantId = saveApplicant(applicant);
-
+       
+       int applicantId = applicant.getApplicantId();
         int vehicleId = saveVehicle(vehicle);
 
         double loanAmount =
@@ -129,7 +200,7 @@ public int saveLoanApplication(
 
         double monthlyPayment =
                 LoanCalculator.calculateMonthlyPayment(loan);
-
+        // Now save the loan application with the foreign keys
         String sql =
                 "INSERT INTO loan_application " +
                 "(applicant_id, vehicle_id, auto_price, down_payment, " +
@@ -167,6 +238,7 @@ public int saveLoanApplication(
             }
         }
     }
+    //Error handling for SQL exceptions during the save process
     catch (SQLException e)
     {
         e.printStackTrace();
@@ -177,9 +249,19 @@ public int saveLoanApplication(
 
 // ==========================
 // Retrieve Loan Application
+//Retrieves a loan application by its ID from the database 
+// and returns it as a LoanApplication object
+//Uses SQL prepared statements to retrieve loan application data 
+// from the database and maps it to a LoanApplication object
+//Joins the loan_application, applicant, and vehicle tables 
+// to get all related data in a single query
+//Returns the loan application as a LoanApplication object
+//Handles SQL exceptions that may occur during
+//  the retrieval process and prints the stack trace for debugging
 // ==========================
 public LoanApplication getLoanApplicationById(int applicationId)
 {
+        // SQL query to join loan_application, applicant, and vehicle tables
     String sql =
             "SELECT * " +
             "FROM loan_application " +
@@ -188,7 +270,7 @@ public LoanApplication getLoanApplicationById(int applicationId)
             "JOIN vehicle " +
             "ON loan_application.vehicle_id = vehicle.vehicle_id " +
             "WHERE loan_application.application_id = ?";
-
+        //Prepared statement to execute the query securely and map the result to a LoanApplication object
     try (Connection conn = connect();
          PreparedStatement stmt = conn.prepareStatement(sql))
     {
@@ -200,6 +282,7 @@ public LoanApplication getLoanApplicationById(int applicationId)
         {
             Applicant applicant =
                     new Applicant(
+                            rs.getInt("user_id"),
                             rs.getInt("applicant_id"),
                             rs.getString("full_name"),
                             rs.getString("email"),
@@ -237,12 +320,241 @@ public LoanApplication getLoanApplicationById(int applicationId)
             );
         }
     }
+    //Error handling for SQL exceptions during the retrieval process
     catch (SQLException e)
     {
         e.printStackTrace();
     }
 
     return null;
+}
+//================================================
+//Loan Officer Side Methods
+//Get Application Status================================
+//Retrieves the status of a loan application from the database
+//Uses SQL prepared statements to query the database for the status of a loan application
+// based on the application ID
+//Returns the status of the loan application as a String
+//Handles SQL exceptions that may occur during the retrieval process and prints the 
+// stack trace for debugging
+// ==========================
+public String getApplicationStatus(int applicationId)
+{
+    String sql =
+            "SELECT status " +
+            "FROM loan_application " +
+            "WHERE application_id = ?";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, applicationId);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next())
+        {
+            return rs.getString("status");
+        }
+    }
+    //Error handling for SQL exceptions during the retrieval process
+    catch (SQLException e)
+    {
+        e.printStackTrace();    
+    }
+
+    return null;
+}
+
+
+//================================================
+//Get Pending Applications================================
+//Retrieves a list of pending loan applications from the database
+//Uses SQL prepared statements to query the database for loan applications with a 
+// status of 'PENDING' and maps the results to a list of LoanApplication objects
+//Returns a list of pending loan applications as LoanApplication objects
+//Handles SQL exceptions that may occur during the retrieval process and prints the 
+// stack trace for debugging
+// ==========================
+public List<LoanApplication> getPendingApplications()
+{
+    List<LoanApplication> applications = new ArrayList<>();
+
+    String sql =
+            "SELECT application_id " +
+            "FROM loan_application " +
+            "WHERE status = 'PENDING'";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql))
+    {
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next())
+        {
+            int applicationId =
+                    rs.getInt("application_id");
+
+            LoanApplication app =
+                    getLoanApplicationById(applicationId);
+
+            if (app != null)
+            {
+                applications.add(app);
+            }
+        }
+    }
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return applications;
+}
+//APPROVE APPLICATION================================
+//Updates the status of a loan application to 'APPROVED' in the database
+//Uses SQL prepared statements to securely update the status of a loan application
+// in the database based on the application ID
+//Returns true if the update was successful, false otherwise
+//Handles SQL exceptions that may occur during the update process and prints the stack trace for debugging
+// ==========================
+public boolean approveApplication(
+        int applicationId,
+        int officerId)
+{
+    String sql =
+            "UPDATE loan_application " +
+            "SET status='APPROVED', reviewed_by=? " +
+            "WHERE application_id=?";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt =
+                 conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+        stmt.setInt(2, applicationId);
+
+        return stmt.executeUpdate() > 0;
+    }
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+//DENY APPLICATION================================
+//Updates the status of a loan application to 'DENIED' in the database
+//Uses SQL prepared statements to securely update the status of a loan application
+// in the database based on the application ID
+//Returns true if the update was successful, false otherwise
+//Handles SQL exceptions that may occur during the update process and prints the stack trace for debugging
+// ==========================
+public boolean denyApplication(
+        int applicationId,
+        int officerId,
+        String notes)
+{
+    String sql =
+            "UPDATE loan_application " +
+            "SET status='DENIED', reviewed_by=?, review_notes=? " +
+            "WHERE application_id=?";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt =
+                 conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+        stmt.setString(2, notes);
+        stmt.setInt(3, applicationId);
+
+        return stmt.executeUpdate() > 0;
+    }
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+//================================================
+//Get Specific Loan Application================================
+//Retrieves a specific loan application by its ID from the database
+//Uses SQL prepared statements to retrieve loan application data
+// from the database and maps it to a LoanApplication object
+//Joins the loan_application, applicant, and vehicle tables to get all related data in a single query
+//Returns the loan application as a LoanApplication object
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public List<LoanApplication> getApplicationsForApplicant(
+        int applicantId)
+{
+    List<LoanApplication> applications =
+            new ArrayList<>();
+
+    String sql =
+            "SELECT application_id " +
+            "FROM loan_application " +
+            "WHERE applicant_id=?";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt =
+                 conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, applicantId);
+
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next())
+        {
+            LoanApplication app =
+                    getLoanApplicationById(
+                            rs.getInt("application_id"));
+
+            if (app != null)
+            {
+                applications.add(app);
+            }
+        }
+    }
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return applications;
+}
+//Assign Loan Officer to Application================================
+//Updates the loan officer ID for a loan application in the database
+//Uses SQL prepared statements to securely update the loan officer ID for a loan application
+// in the database based on the application ID
+//Returns true if the update was successful, false otherwise
+//Handles SQL exceptions that may occur during the update process and prints the stack trace for debugging
+// ==========================
+public boolean assignLoanOfficer(
+        int applicationId,
+        int loanOfficerId)
+{
+    String sql =
+            "UPDATE loan_application " +
+            "SET loan_officer_id=? " +
+            "WHERE application_id=?";
+
+    try (Connection conn = connect();
+         PreparedStatement stmt =
+                 conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, loanOfficerId);
+        stmt.setInt(2, applicationId);
+
+        return stmt.executeUpdate() > 0;
+    }
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return false;       
 }
 
 

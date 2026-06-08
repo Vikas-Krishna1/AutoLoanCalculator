@@ -7,6 +7,7 @@ import src.models.Vehicle;
 import src.services.LoanCalculator;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class LoanForm extends JFrame
@@ -44,17 +45,58 @@ public class LoanForm extends JFrame
 
     public LoanForm()
     {
-        setTitle("Auto Loan Application System");
-        setSize(800, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Auto Loan Application");
+        setSize(850, 850);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(0, 2, 5, 5));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(new EmptyBorder(10,10,10,10));
 
-        // ==========================
-        // Applicant Information
-        // ==========================
+        JLabel title =
+                new JLabel(
+                        "AUTO LOAN APPLICATION",
+                        SwingConstants.CENTER);
+
+        title.setFont(
+                new Font("Arial",
+                        Font.BOLD,
+                        22));
+
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        mainPanel.add(title);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(createApplicantPanel());
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(createVehiclePanel());
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(createLoanPanel());
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(createResultsPanel());
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(createButtonPanel());
+
+        add(new JScrollPane(mainPanel));
+
+        setVisible(true);
+    }
+
+    private JPanel createApplicantPanel()
+    {
+        JPanel panel =
+                new JPanel(new GridLayout(7,2,5,5));
+
+        panel.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Applicant Information"));
+
         panel.add(new JLabel("Full Name"));
         fullNameField = new JTextField();
         panel.add(fullNameField);
@@ -83,9 +125,18 @@ public class LoanForm extends JFrame
         employerField = new JTextField();
         panel.add(employerField);
 
-        // ==========================
-        // Vehicle Information
-        // ==========================
+        return panel;
+    }
+
+    private JPanel createVehiclePanel()
+    {
+        JPanel panel =
+                new JPanel(new GridLayout(3,2,5,5));
+
+        panel.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Vehicle Information"));
+
         panel.add(new JLabel("Make"));
         makeField = new JTextField();
         panel.add(makeField);
@@ -98,9 +149,18 @@ public class LoanForm extends JFrame
         yearField = new JTextField();
         panel.add(yearField);
 
-        // ==========================
-        // Loan Information
-        // ==========================
+        return panel;
+    }
+
+    private JPanel createLoanPanel()
+    {
+        JPanel panel =
+                new JPanel(new GridLayout(7,2,5,5));
+
+        panel.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Loan Information"));
+
         panel.add(new JLabel("Auto Price"));
         autoPriceField = new JTextField();
         panel.add(autoPriceField);
@@ -109,7 +169,7 @@ public class LoanForm extends JFrame
         downPaymentField = new JTextField();
         panel.add(downPaymentField);
 
-        panel.add(new JLabel("Loan Term (Months)"));
+        panel.add(new JLabel("Loan Term (Years)"));
         loanTermField = new JTextField();
         panel.add(loanTermField);
 
@@ -129,16 +189,38 @@ public class LoanForm extends JFrame
         cashIncentiveField = new JTextField();
         panel.add(cashIncentiveField);
 
-        // ==========================
-        // Results
-        // ==========================
+        return panel;
+    }
+
+    private JPanel createResultsPanel()
+    {
+        JPanel panel =
+                new JPanel(new GridLayout(2,2,5,5));
+
+        panel.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Loan Summary"));
+
         panel.add(new JLabel("Loan Amount"));
-        loanAmountLabel = new JLabel("$0.00");
+
+        loanAmountLabel =
+                new JLabel("$0.00");
+
         panel.add(loanAmountLabel);
 
         panel.add(new JLabel("Monthly Payment"));
-        monthlyPaymentLabel = new JLabel("$0.00");
+
+        monthlyPaymentLabel =
+                new JLabel("$0.00");
+
         panel.add(monthlyPaymentLabel);
+
+        return panel;
+    }
+
+    private JPanel createButtonPanel()
+    {
+        JPanel panel = new JPanel();
 
         JButton calculateButton =
                 new JButton("Calculate");
@@ -146,159 +228,158 @@ public class LoanForm extends JFrame
         JButton saveButton =
                 new JButton("Save Application");
 
+        JButton clearButton =
+                new JButton("Clear");
+
+        calculateButton.addActionListener(
+                e -> calculateLoan());
+
+        saveButton.addActionListener(
+                e -> saveApplication());
+
+        clearButton.addActionListener(
+                e -> clearForm());
+
         panel.add(calculateButton);
         panel.add(saveButton);
+        panel.add(clearButton);
 
-        add(new JScrollPane(panel));
-
-        // ==========================
-        // Calculate
-        // ==========================
-        calculateButton.addActionListener(e ->
-        {
-            try
-            {
-                currentApplicant =
-                        new Applicant(
-                                0,
-                                fullNameField.getText(),
-                                emailField.getText(),
-                                phoneField.getText(),
-                                addressField.getText(),
-                                dobField.getText(),
-                                ssnField.getText(),
-                                employerField.getText()
-                        );
-
-                currentVehicle =
-                        new Vehicle(
-                                0,
-                                makeField.getText(),
-                                modelField.getText(),
-                                Integer.parseInt(
-                                        yearField.getText())
-                        );
-
-                currentLoan =
-                        new AutoLoan(
-                                Double.parseDouble(
-                                        autoPriceField.getText()),
-                                Double.parseDouble(
-                                        downPaymentField.getText()),
-                                Integer.parseInt(
-                                        loanTermField.getText()),
-                                Double.parseDouble(
-                                        interestRateField.getText()),
-                                Double.parseDouble(
-                                        salesTaxField.getText()),
-                                Double.parseDouble(
-                                        feesField.getText()),
-                                Double.parseDouble(
-                                        cashIncentiveField.getText())
-                        );
-
-                double loanAmount =
-                        LoanCalculator.calculateLoanAmount(
-                                currentLoan);
-
-                double monthlyPayment =
-                        LoanCalculator.calculateMonthlyPayment(
-                                currentLoan);
-
-                loanAmountLabel.setText(
-                        String.format("$%.2f", loanAmount));
-
-                monthlyPaymentLabel.setText(
-                        String.format("$%.2f", monthlyPayment));
-            }
-            catch (Exception ex)
-            {
-                JOptionPane.showMessageDialog(
-                        this,
-                        ex.getMessage(),
-                        "Input Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
-        });
-
-        // ==========================
-        // Save
-        // ==========================
-        saveButton.addActionListener(e ->
-        {
-            try
-            {
-                if (currentLoan == null)
-                {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Calculate first."
-                    );
-                    return;
-                }
-
-                DatabaseManager db =
-                        new DatabaseManager();
-
-                int applicationId =
-                        db.saveLoanApplication(
-                                currentApplicant,
-                                currentVehicle,
-                                currentLoan
-                        );
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Application Saved!\nID: "
-                                + applicationId
-                
-                );
-
-                clearForm();
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        ex.getMessage(),
-                        "Database Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
-        });
-
-        setVisible(true);
+        return panel;
     }
+
+    private void calculateLoan()
+    {
+        try
+        {
+            currentApplicant =
+                    new Applicant(      
+                            fullNameField.getText(),
+                            emailField.getText(),
+                            phoneField.getText(),
+                            addressField.getText(),
+                            dobField.getText(),
+                            ssnField.getText(),
+                            employerField.getText());
+
+            currentVehicle =
+                    new Vehicle(
+                            0,
+                            makeField.getText(),
+                            modelField.getText(),
+                            Integer.parseInt(
+                                    yearField.getText()));
+
+            currentLoan =
+                    new AutoLoan(
+                            Double.parseDouble(
+                                    autoPriceField.getText()),
+                            Double.parseDouble(
+                                    downPaymentField.getText()),
+                            Integer.parseInt(
+                                    loanTermField.getText()),
+                            Double.parseDouble(
+                                    interestRateField.getText()),
+                            Double.parseDouble(
+                                    salesTaxField.getText()),
+                            Double.parseDouble(
+                                    feesField.getText()),
+                            Double.parseDouble(
+                                    cashIncentiveField.getText()));
+
+            double loanAmount =
+                    LoanCalculator.calculateLoanAmount(
+                            currentLoan);
+
+            double monthlyPayment =
+                    LoanCalculator.calculateMonthlyPayment(
+                            currentLoan);
+
+            loanAmountLabel.setText(
+                    String.format("$%.2f",
+                            loanAmount));
+
+            monthlyPaymentLabel.setText(
+                    String.format("$%.2f",
+                            monthlyPayment));
+        }
+        catch (Exception ex)
+        {
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void saveApplication()
+    {
+        try
+        {
+            if (currentLoan == null)
+            {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Calculate first.");
+
+                return;
+            }
+
+            DatabaseManager db =
+                    new DatabaseManager();
+
+            int applicationId =
+                    db.saveLoanApplication(
+                            currentApplicant,
+                            currentVehicle,
+                            currentLoan);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Application Saved!\nID: "
+                            + applicationId);
+
+            clearForm();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void clearForm()
-{
-    fullNameField.setText("");
-    emailField.setText("");
-    phoneField.setText("");
-    addressField.setText("");
-    dobField.setText("");
-    ssnField.setText("");
-    employerField.setText("");
+    {
+        fullNameField.setText("");
+        emailField.setText("");
+        phoneField.setText("");
+        addressField.setText("");
+        dobField.setText("");
+        ssnField.setText("");
+        employerField.setText("");
 
-    makeField.setText("");
-    modelField.setText("");
-    yearField.setText("");
+        makeField.setText("");
+        modelField.setText("");
+        yearField.setText("");
 
-    autoPriceField.setText("");
-    downPaymentField.setText("");
-    loanTermField.setText("");
-    interestRateField.setText("");
-    salesTaxField.setText("");
-    feesField.setText("");
-    cashIncentiveField.setText("");
+        autoPriceField.setText("");
+        downPaymentField.setText("");
+        loanTermField.setText("");
+        interestRateField.setText("");
+        salesTaxField.setText("");
+        feesField.setText("");
+        cashIncentiveField.setText("");
 
-    loanAmountLabel.setText("$0.00");
-    monthlyPaymentLabel.setText("$0.00");
+        loanAmountLabel.setText("$0.00");
+        monthlyPaymentLabel.setText("$0.00");
 
-    currentApplicant = null;
-    currentVehicle = null;
-    currentLoan = null;
-}
+        currentApplicant = null;
+        currentVehicle = null;
+        currentLoan = null;
+    }
 }

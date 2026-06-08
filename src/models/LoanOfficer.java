@@ -1,14 +1,16 @@
 package src.models;
+//LoanOfficer
+//This class represents a loan officer.
+
 
 public class LoanOfficer
 {
+    // Instance variables
     private int officerId;
     private String fullName;
     private String email;
-
-    public LoanOfficer(int officerId,
-                       String fullName,
-                       String email)
+    // Constructor
+    public LoanOfficer(int officerId,String fullName,String email)
     {
         this.officerId = officerId;
         this.fullName = fullName;
@@ -49,4 +51,6 @@ public class LoanOfficer
                 ", email='" + email + '\'' +
                 '}';
     }
+    
+
 }

@@ -1,6 +1,7 @@
 package src.models;
 public class Applicant
 {
+    private int user_id;
     private int applicant_id;
     private String full_name;
     private String email;
@@ -10,8 +11,9 @@ public class Applicant
     private String ssn;
     private String employerName;
 
-    public Applicant(int applicant_id, String full_name, String email, String phone, String address, String dateOfBirth, String ssn, String employerName)
+    public Applicant(int user_id,int applicant_id, String full_name, String email, String phone, String address, String dateOfBirth, String ssn, String employerName)
     {
+        this.user_id = user_id;
         this.applicant_id = applicant_id;
         this.full_name = full_name;
         this.email = email;
@@ -21,7 +23,28 @@ public class Applicant
         this.ssn = ssn;
         this.employerName = employerName;
     }
+    public Applicant(
+        String full_name,
+        String email,
+        String phone,
+        String address,
+        String dateOfBirth,
+        String ssn,
+        String employerName)
+{
+    this.full_name = full_name;
+    this.email = email;
+    this.phone = phone;
+    this.address = address;
+    this.dateOfBirth = dateOfBirth;
+    this.ssn = ssn;
+    this.employerName = employerName;
+}
+
     //Getters
+    public int getUserId() {
+        return user_id;
+    }
     public int getApplicantId()    {
         return applicant_id;
     }
@@ -70,6 +93,9 @@ public class Applicant
     }
     public void setEmployerName(String employerName) {
         this.employerName = employerName;
+    }
+    public void setUserId(int user_id) {
+        this.user_id = user_id;
     }
     @Override
     public String toString() {
