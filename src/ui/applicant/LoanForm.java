@@ -1,15 +1,16 @@
 package src.ui.applicant;
-
 import src.db.DatabaseManager;
 import src.models.Applicant;
 import src.models.AutoLoan;
 import src.models.Vehicle;
 import src.services.LoanCalculator;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-
+//LOAN FORM
+//This class represents the loan form
+//It allows the user to apply for a loan
+//and view the results
 public class LoanForm extends JFrame
 {
     // Applicant Fields
@@ -105,6 +106,7 @@ public class LoanForm extends JFrame
 
         panel.add(new JLabel("Email"));
         emailField = new JTextField();
+
         panel.add(emailField);
 
         panel.add(new JLabel("Phone"));
@@ -253,6 +255,7 @@ public class LoanForm extends JFrame
     {
         try
         {
+        validateForm();
             currentApplicant =
                     new Applicant(  
                             user_id, 
@@ -330,6 +333,7 @@ System.out.println("Applicant user_id = " +
                 return;
             }
 
+
             DatabaseManager db =
                     new DatabaseManager();
 
@@ -387,4 +391,128 @@ System.out.println("Applicant user_id = " +
         currentVehicle = null;
         currentLoan = null;
     }
+    private void validateForm() throws Exception
+{
+    // Required fields
+    if(fullNameField.getText().trim().isEmpty() ||
+       emailField.getText().trim().isEmpty() ||
+       phoneField.getText().trim().isEmpty() ||
+       addressField.getText().trim().isEmpty() ||
+       dobField.getText().trim().isEmpty() ||
+       ssnField.getText().trim().isEmpty() ||
+       employerField.getText().trim().isEmpty() ||
+       makeField.getText().trim().isEmpty() ||
+       modelField.getText().trim().isEmpty() ||
+       yearField.getText().trim().isEmpty() ||
+       autoPriceField.getText().trim().isEmpty() ||
+       downPaymentField.getText().trim().isEmpty() ||
+       loanTermField.getText().trim().isEmpty() ||
+       interestRateField.getText().trim().isEmpty())
+    {
+        throw new Exception("All required fields must be completed.");
+    }
+
+    // Email
+    if(!emailField.getText().trim()
+            .matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"))
+    {
+        throw new Exception("Invalid email address.");
+    }
+
+    // Phone
+    if(!phoneField.getText().trim()
+            .matches("\\d{10}"))
+    {
+        throw new Exception(
+                "Phone number must contain 10 digits.");
+    }
+
+    // SSN
+    if(!ssnField.getText().trim()
+            .matches("\\d{9}"))
+    {
+        throw new Exception(
+                "SSN must contain 9 digits.");
+    }
+
+    int year =
+            Integer.parseInt(yearField.getText());
+
+    if(year < 1900 || year > 2035)
+    {
+        throw new Exception(
+                "Vehicle year must be between 1900 and 2035.");
+    }
+
+    double autoPrice =
+            Double.parseDouble(
+                    autoPriceField.getText());
+
+    if(autoPrice <= 0)
+    {
+        throw new Exception(
+                "Vehicle price must be greater than 0.");
+    }
+
+    double downPayment =
+            Double.parseDouble(
+                    downPaymentField.getText());
+
+    if(downPayment < 0)
+    {
+        throw new Exception(
+                "Down payment cannot be negative.");
+    }
+
+    if(downPayment > autoPrice)
+    {
+        throw new Exception(
+                "Down payment cannot exceed vehicle price.");
+    }
+
+    int term =
+            Integer.parseInt(
+                    loanTermField.getText());
+
+    if(term < 1 || term > 7)
+    {
+        throw new Exception(
+                "Loan term must be between 1 and 7 years.");
+    }
+
+    double rate =
+            Double.parseDouble(
+                    interestRateField.getText());
+
+    if(rate < 0 || rate > 30)
+    {
+        throw new Exception(
+                "Interest rate must be between 0 and 30%.");
+    }
+
+    double tax =
+            Double.parseDouble(
+                    salesTaxField.getText());
+
+    if(tax < 0)
+    {
+        throw new Exception(
+                "Sales tax cannot be negative.");
+    }
+
+    double fees =
+            Double.parseDouble(
+                    feesField.getText());
+
+    if(fees < 0)
+    {
+        throw new Exception(
+                "Fees cannot be negative.");
+    }
+    if(!dobField.getText().matches("\\d{4}-\\d{2}-\\d{2}"))
+{
+    throw new Exception(
+            "Date must be in YYYY-MM-DD format.");
+}
+}
 }
