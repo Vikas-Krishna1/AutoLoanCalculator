@@ -1,21 +1,26 @@
 package src.models;
+//LoanApplication Class==================
+//Represents a loan application with associated 
+// applicant, vehicle, and loan details
+//======================================
 public class LoanApplication
 {
+    // instance variables
     private int applicationId;
-
     private String status;
     private Applicant applicant;
     private Vehicle vehicle;
     private AutoLoan loan;
-
+    
+    // constructor
     public LoanApplication(
-
+        String status,
             int applicationId,
             Applicant applicant,
             Vehicle vehicle,
             AutoLoan loan)
     {
-        this.status = "Pending";
+        this.status = status;
         this.applicationId = applicationId;
         this.applicant = applicant;
         this.vehicle = vehicle;

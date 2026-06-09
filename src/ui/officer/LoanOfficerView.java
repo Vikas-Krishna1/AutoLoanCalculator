@@ -1,21 +1,21 @@
 package src.ui.officer;
-import javax.swing.JFrame;
-
 import src.db.DatabaseManager;
 import src.models.Applicant;
 import src.models.AutoLoan;
 import src.models.LoanApplication;
 import src.models.Vehicle;
 import src.services.LoanCalculator;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-
+//LOAN OFFICER VIEW
+//This class represents the loan officer view
+//It allows the loan officer to view and manage loan applications
+//and assign loan officers to applications
 public class LoanOfficerView extends JFrame
 {
+    // UI Components
     private JTextField applicationIdField;
-
     private JLabel applicantNameLabel;
     private JLabel applicantEmailLabel;
     private JLabel applicantPhoneLabel;
@@ -179,10 +179,15 @@ public class LoanOfficerView extends JFrame
                 int applicationId =
                         Integer.parseInt(
                                 applicationIdField.getText());
-
+System.out.println(
+        "Loading application "
+                + applicationId);
                 currentApplication =
                         db.getLoanApplicationById(
                                 applicationId);
+        System.out.println(
+        "Loading application "
+                + applicationId);
 
                 if(currentApplication == null)
                 {
@@ -209,48 +214,66 @@ public class LoanOfficerView extends JFrame
         // ==========================
         // Approve
         // ==========================
-        approveButton.addActionListener(e ->
-        {
-            if(currentApplication == null)
-            {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Load an application first.");
+approveButton.addActionListener(e ->
+{
+    if(currentApplication == null)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Load an application first.");
+        return;
+    }
 
-                return;
-            }
+    boolean success =db.approveApplication(currentApplication.getApplicationId(),1, notesArea.getText()); // officer id
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Application Approved");
+    if(success)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Application Approved");
 
-            clearView();
-        });
+        clearView();
+    }
+    else
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Approval failed");
+    }
+});
 
         // ==========================
         // Reject
         // ==========================
-        rejectButton.addActionListener(e ->
-        {
-            if(currentApplication == null)
-            {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Load an application first.");
-
-                return;
-            }
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Application Rejected");
-
-            clearView();
-        });
-
-        setVisible(true);
+rejectButton.addActionListener(e ->
+{
+    if(currentApplication == null)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Load an application first.");
+        return;
     }
 
+    boolean success = db.denyApplication(currentApplication.getApplicationId(),1, // officer id
+ notesArea.getText());
+
+    if(success)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Application Rejected");
+
+        clearView();
+    }
+    else
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Rejection failed");
+    }
+});
+}
     private void populateApplication(
             LoanApplication application)
     {
@@ -319,6 +342,11 @@ public class LoanOfficerView extends JFrame
     }
     public LoanOfficerView(int applicationId) {
         this();
+        System.out.println(
+            "Constructor received "
+                    + applicationId);
+        applicationIdField.setText(String.valueOf(applicationId));
         loadButton.doClick();
+        setVisible(true);
     }
 }

@@ -6,16 +6,22 @@ import src.ui.officer.ApplicationQueueView;
 import src.ui.officer.LoanOfficerView;
 import javax.swing.JOptionPane;
 import java.sql.*;
+//MAIN CLASS
+//This Class is the entry point of the application
 public class Main
 {
+    //hardcored User ID until Login is implemented
      static int user_id=1;
     public static void main(String[] args)
     {
-       
+       // DatabaseManager db = new DatabaseManager();
         DatabaseManager db = new DatabaseManager();
+        //Check if env variables are loaded correctly
         db.printEnvVariables();
+        //Opens the view
         openView();
     }
+    //Opens the view
     public static void openView()
     {
         SwingUtilities.invokeLater(() ->

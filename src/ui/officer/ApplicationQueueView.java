@@ -1,25 +1,26 @@
 package src.ui.officer;
-
 import src.db.DatabaseManager;
 import src.models.LoanApplication;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-
+//LOAN OFFICER APPLICATION QUEUE
+//This class represents the loan officer application queue view
+//It allows the loan officer to view and manage loan applications   
+//and assign loan officers to applications
 public class ApplicationQueueView extends JFrame
 {
+    //Components/Variables
     private JTable applicationTable;
     private DefaultTableModel tableModel;
-
     private JButton refreshButton;
     private JButton openButton;
-
     private DatabaseManager db;
-
+//Constructor
     public ApplicationQueueView()
     {
+        //DatabaseManager db = new DatabaseManager();
         db = new DatabaseManager();
 
         setTitle("Loan Officer - Application Queue");
@@ -178,6 +179,11 @@ public class ApplicationQueueView extends JFrame
                                 selectedRow,
                                 0);
 
+         System.out.println(
+            "Opening application "
+                    + applicationId);
+
+        //Open loan officer view
         new LoanOfficerView(applicationId);
     }
 }

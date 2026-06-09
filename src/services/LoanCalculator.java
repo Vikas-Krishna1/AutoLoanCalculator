@@ -1,7 +1,8 @@
 package src.services;
-
 import src.models.AutoLoan;
-
+// ==========================
+// Loan Calculator Service
+// ==========================
 public class LoanCalculator
 {
     // Amount financed (principal)

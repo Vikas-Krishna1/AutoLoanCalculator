@@ -1,4 +1,8 @@
 package src.models;
+//APPLICANT CLASS====================================
+//This class is used to create an applicant object that 
+//represents a person applying for a loan
+//====================================================
 public class Applicant
 {
     private int user_id;
@@ -13,6 +17,7 @@ public class Applicant
 
     public Applicant(int user_id,int applicant_id, String full_name, String email, String phone, String address, String dateOfBirth, String ssn, String employerName)
     {
+        //Private  instance variables
         this.user_id = user_id;
         this.applicant_id = applicant_id;
         this.full_name = full_name;
@@ -23,14 +28,8 @@ public class Applicant
         this.ssn = ssn;
         this.employerName = employerName;
     }
-    public Applicant(
-        String full_name,
-        String email,
-        String phone,
-        String address,
-        String dateOfBirth,
-        String ssn,
-        String employerName)
+    //Constructor for Applicant without user_id
+    public Applicant(String full_name,String email,String phone, String address,String dateOfBirth, String ssn,String employerName)
 {
     this.full_name = full_name;
     this.email = email;
@@ -40,15 +39,8 @@ public class Applicant
     this.ssn = ssn;
     this.employerName = employerName;
 }
-public Applicant(
-        int user_id,
-        String full_name,
-        String email,
-        String phone,
-        String address,
-        String dateOfBirth,
-        String ssn,
-        String employerName)
+//Constructor for Applicant with user_id
+public Applicant(int user_id,String full_name,String email, String phone,  String address, String dateOfBirth,  String ssn, String employerName)
 {
     this.user_id = user_id;
     this.full_name = full_name;

@@ -1,12 +1,16 @@
 package src.models;
+//Vehicle Class==================
+//Represents a vehicle with associated 
+// make, model, and year
+//======================================    
 public class Vehicle
 {
+    // Private instance variables
     private int applicationId;
-
     private String make;
     private String model;
     private int year;
-
+// Constructor
     public Vehicle(int applicationId, String make,String model,int year)
     {
         this.applicationId = applicationId;
