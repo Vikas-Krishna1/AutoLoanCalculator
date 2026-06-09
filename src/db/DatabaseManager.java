@@ -18,6 +18,7 @@ import src.services.LoanCalculator;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 // ==========================
 public class DatabaseManager
 {
@@ -358,6 +359,86 @@ public LoanApplication getLoanApplicationById(int applicationId)
     }
 
     return null;
+}
+public List<LoanApplication> getApplicationsByUserId(int userId)
+{
+    // SQL query to join loan_application, applicant, and vehicle tables
+    String sql =
+            "SELECT * " +
+            "FROM loan_application " +
+            "JOIN applicant " +
+            "ON loan_application.applicant_id = applicant.applicant_id " +
+            "JOIN vehicle " +
+            "ON loan_application.vehicle_id = vehicle.vehicle_id " +
+            "WHERE applicant.user_id = ?";
+    //Prepared statement to execute the query securely and map the result to a LoanApplication object
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, userId);
+
+        ResultSet rs = stmt.executeQuery();
+
+        List<LoanApplication> applications = new ArrayList<>();
+
+        while (rs.next())
+        {
+            System.out.println("Found application");
+            Applicant applicant =
+                    new Applicant(
+                            rs.getInt("user_id"),
+                            rs.getInt("applicant_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("phone"),
+                            rs.getString("address"),
+                            rs.getString("date_of_birth"),
+                            rs.getString("ssn"),
+                            rs.getString("employer_name")
+                    );
+                     System.out.println("Applicant loaded");    
+
+            Vehicle vehicle =
+                    new Vehicle(
+                            rs.getInt("vehicle_id"),
+                            rs.getString("make"),
+                            rs.getString("model"),
+                            rs.getInt("year")
+                    );
+        System.out.println("Vehicle loaded");
+            AutoLoan loan =
+                    new AutoLoan(
+                            rs.getDouble("auto_price"),
+                            rs.getDouble("down_payment"),
+                            rs.getInt("loan_term"),
+                            rs.getDouble("interest_rate"),
+                            rs.getDouble("sales_tax"),
+                            rs.getDouble("fees"),
+                            rs.getDouble("cash_incentive")
+                    );
+                        System.out.println("Loan loaded");
+
+            LoanApplication application =
+                    new LoanApplication(
+                            rs.getString("status"),
+                            rs.getInt("application_id"),
+                            applicant,
+                            vehicle,
+                            loan
+                    );
+
+            applications.add(application);
+        }
+
+        return applications;
+    }
+    //Error handling for SQL exceptions during the retrieval process
+    catch (SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return new ArrayList<>();            
 }
 //================================================
 //Loan Officer Side Methods

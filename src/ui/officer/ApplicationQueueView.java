@@ -16,6 +16,7 @@ public class ApplicationQueueView extends JFrame
     private DefaultTableModel tableModel;
     private JButton refreshButton;
     private JButton openButton;
+    private JComboBox<String> statusFilter;
     private DatabaseManager db;
 //Constructor
     public ApplicationQueueView()
@@ -27,6 +28,13 @@ public class ApplicationQueueView extends JFrame
         setSize(900, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    //Filters based on status of the loan application
+    statusFilter = new JComboBox<>(new String[] { "Pending", "Approved", "Declined" });
+
+     statusFilter.addActionListener(e -> 
+        loadApplications()
+    );
+   
 
         setLayout(new BorderLayout());
 
@@ -86,6 +94,9 @@ public class ApplicationQueueView extends JFrame
                 new JButton("Open Application");
 
         buttonPanel.add(refreshButton);
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(openButton);
+        buttonPanel.add(statusFilter);
         buttonPanel.add(openButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
@@ -105,60 +116,70 @@ public class ApplicationQueueView extends JFrame
         setVisible(true);
     }
 
-    private void loadApplications()
+private void loadApplications()
+{
+    tableModel.setRowCount(0);
+
+    try
     {
-        tableModel.setRowCount(0);
+        List<LoanApplication> applications =
+                db.getAllApplications();
 
-        try
+        String selectedStatus =
+                (String) statusFilter.getSelectedItem();
+
+        for(LoanApplication application : applications)
         {
-            List<LoanApplication> applications =
-                    db.getAllApplications();
-
-            for(LoanApplication application : applications)
+            // Apply filter
+            if(selectedStatus != null
+                    && !selectedStatus.equalsIgnoreCase("ALL")
+                    && !application.getStatus().equalsIgnoreCase(selectedStatus))
             {
-                String applicantName =
-                        application
-                                .getApplicant()
-                                .getFullName();
-
-                String vehicleName =
-                        application
-                                .getVehicle()
-                                .getYear()
-                                + " "
-                                + application
-                                .getVehicle()
-                                .getMake()
-                                + " "
-                                + application
-                                .getVehicle()
-                                .getModel();
-
-                tableModel.addRow(
-                        new Object[]
-                        {
-                            application.getApplicationId(),
-                            applicantName,
-                            vehicleName,
-                            String.format(
-                                    "$%.2f",
-                                    application
-                                            .getLoan()
-                                            .getAutoPrice()),
-                            application.getStatus()
-                        });
+                continue;
             }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Unable to load applications.");
+            String applicantName =
+                    application
+                            .getApplicant()
+                            .getFullName();
+
+            String vehicleName =
+                    application
+                            .getVehicle()
+                            .getYear()
+                            + " "
+                            + application
+                            .getVehicle()
+                            .getMake()
+                            + " "
+                            + application
+                            .getVehicle()
+                            .getModel();
+
+            tableModel.addRow(
+                    new Object[]
+                    {
+                        application.getApplicationId(),
+                        applicantName,
+                        vehicleName,
+                        String.format(
+                                "$%.2f",
+                                application
+                                        .getLoan()
+                                        .getAutoPrice()),
+                        application.getStatus()
+                    });
         }
     }
+    catch(Exception e)
+    {
+        e.printStackTrace();
 
+        JOptionPane.showMessageDialog(
+                this,
+                "Unable to load applications.");
+    }
+}
     private void openSelectedApplication()
     {
         int selectedRow =

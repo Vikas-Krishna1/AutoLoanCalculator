@@ -1,6 +1,7 @@
 package src.Main;
 import javax.swing.SwingUtilities;
 import src.db.DatabaseManager;
+import src.ui.applicant.ApplicationDashboard;
 import src.ui.applicant.LoanForm;
 import src.ui.officer.ApplicationQueueView;
 import src.ui.officer.LoanOfficerView;
@@ -45,7 +46,7 @@ public class Main
 
             if(choice == 0)
             {
-                new LoanForm(user_id);
+                new ApplicationDashboard(user_id);
             }
             else if(choice == 1)
             {
