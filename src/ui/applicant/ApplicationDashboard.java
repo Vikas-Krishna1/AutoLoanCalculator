@@ -31,6 +31,10 @@ public class ApplicationDashboard extends JFrame
     private JButton newApplicationButton;
     //View Button
     private JButton viewButton;
+    //Application History Button
+    private JButton historyButton;
+    //Back Button
+    private JButton backButton;
     //Database Manager connection
     private DatabaseManager db;
 
@@ -108,6 +112,10 @@ public class ApplicationDashboard extends JFrame
         buttonPanel.add(newApplicationButton);
         buttonPanel.add(viewButton);
 
+        historyButton = new JButton("Application History");
+        buttonPanel.add(historyButton);
+        historyButton.addActionListener(e -> new ApplicationHistoryView(userId));
+
         add(buttonPanel, BorderLayout.SOUTH);
 
         refreshButton.addActionListener(
@@ -123,6 +131,7 @@ public class ApplicationDashboard extends JFrame
 
         setVisible(true);
     }
+    
 
     private void loadApplications()
     {

@@ -25,3 +25,5 @@ target/
 
 # Temporary files
 *.tmp
+# XML
+.XML
