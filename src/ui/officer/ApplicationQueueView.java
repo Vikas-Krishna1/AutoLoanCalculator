@@ -1,11 +1,11 @@
-package src.ui.officer;
-import src.db.DatabaseManager;
-import src.models.LoanApplication;
+package ui.officer;
+import db.DatabaseManager;
+import models.LoanApplication;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import src.ui.table.*;
+import ui.table.*;
 
 //LOAN OFFICER APPLICATION QUEUE
 //This class represents the loan officer application queue view
@@ -25,6 +25,7 @@ public class ApplicationQueueView extends JFrame
     private JLabel pendingLabel;
     private JLabel approvedLabel;
     private JLabel deniedLabel;
+    private JButton StatsButton;
     private DatabaseManager db;
     int pending;
     int approved;
@@ -148,6 +149,15 @@ statsPanel.add(deniedLabel);
     {
     searchApplications();
     });
+    JButton statsButton =
+        new JButton("Statistics");
+
+buttonPanel.add(statsButton);
+
+statsButton.addActionListener(e ->
+{
+    new officerStatsView();
+});
     }
     
     

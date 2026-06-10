@@ -1,9 +1,9 @@
-package src.ui.applicant;
-import src.db.DatabaseManager;
-import src.models.Applicant;
-import src.models.AutoLoan;
-import src.models.Vehicle;
-import src.services.LoanCalculator;
+package ui.applicant;
+import db.DatabaseManager;
+import models.Applicant;
+import models.AutoLoan;
+import models.Vehicle;
+import services.LoanCalculator;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

@@ -1,10 +1,10 @@
-package src.Main;
+package Main;
 import javax.swing.SwingUtilities;
-import src.db.DatabaseManager;
-import src.ui.applicant.ApplicationDashboard;
-import src.ui.applicant.LoanForm;
-import src.ui.officer.ApplicationQueueView;
-import src.ui.officer.LoanOfficerView;
+import db.DatabaseManager;
+import ui.applicant.ApplicationDashboard;
+import ui.applicant.LoanForm;
+import ui.officer.ApplicationQueueView;
+import ui.officer.LoanOfficerView;
 import javax.swing.JOptionPane;
 import java.sql.*;
 //MAIN CLASS

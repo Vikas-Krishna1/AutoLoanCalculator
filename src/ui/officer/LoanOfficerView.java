@@ -1,10 +1,10 @@
-package src.ui.officer;
-import src.db.DatabaseManager;
-import src.models.Applicant;
-import src.models.AutoLoan;
-import src.models.LoanApplication;
-import src.models.Vehicle;
-import src.services.LoanCalculator;
+package ui.officer;
+import db.DatabaseManager;
+import models.Applicant;
+import models.AutoLoan;
+import models.LoanApplication;
+import models.Vehicle;
+import services.LoanCalculator;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -179,6 +179,8 @@ public class LoanOfficerView extends JFrame
                 int applicationId =
                         Integer.parseInt(
                                 applicationIdField.getText());
+                currentApplication =
+                        db.getLoanApplicationById(applicationId);                
 
 
                 if(currentApplication == null)

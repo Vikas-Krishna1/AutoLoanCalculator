@@ -1,4 +1,4 @@
-package src.ui.applicant;
+package ui.applicant;
 //======================================
 //APPLICANT APPLICATION DASHBOARD
 //This class represents the applicant application dashboard
@@ -9,14 +9,14 @@ package src.ui.applicant;
 //======================================
 
 //Imports
-import src.db.DatabaseManager;
-import src.models.LoanApplication;
-import src.services.LoanCalculator;
+import db.DatabaseManager;
+import models.LoanApplication;
+import services.LoanCalculator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import src.ui.table.*;
+import ui.table.*;
 public class ApplicationDashboard extends JFrame
 {
     //Feilds, and variables and UI components

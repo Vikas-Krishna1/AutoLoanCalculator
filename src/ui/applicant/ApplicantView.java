@@ -1,4 +1,4 @@
-package src.ui.applicant;
+package ui.applicant;
 import javax.swing.JFrame;
 //APPLICANT VIEW
 //Load the loan form

@@ -1,13 +1,15 @@
-package src.ui.applicant;
+package ui.applicant;
 import javax.swing .*;
 
 import java.awt.*;
+import java.io.IOException;
 
-import src.db.DatabaseManager;
-import src.models.Applicant;
-import src.models.AutoLoan;
-import src.models.LoanApplication;
-import src.models.Vehicle;
+import db.DatabaseManager;
+import models.Applicant;
+import models.AutoLoan;
+import models.LoanApplication;
+import models.Vehicle;
+import utils.PDFExporter;
 
 public class ViewForm extends JFrame {
     public ViewForm(int applicationId)
@@ -278,6 +280,35 @@ public class ViewForm extends JFrame {
             new JPanel();
 
     buttonPanel.add(closeButton);
+    JButton exportButton = new JButton("Export");
+    exportButton.addActionListener(e ->
+{
+    JFileChooser chooser =
+            new JFileChooser();
+
+    chooser.setSelectedFile(
+            new java.io.File(
+                    "Application_"
+                            + application.getApplicationId()
+                            + ".pdf"));
+
+    int result =
+            chooser.showSaveDialog(this);
+
+    if(result == JFileChooser.APPROVE_OPTION)
+    {
+        utils.PDFExporter.exportApplication(
+                application,
+                chooser
+                        .getSelectedFile()
+                        .getAbsolutePath());
+
+        JOptionPane.showMessageDialog(
+                this,
+                "PDF exported successfully.");
+    }
+});
+    buttonPanel.add(exportButton);
 
     // =====================================
     // ADD COMPONENTS

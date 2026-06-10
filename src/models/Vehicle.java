@@ -1,4 +1,4 @@
-package src.models;
+package models;
 //Vehicle Class==================
 //Represents a vehicle with associated 
 // make, model, and year

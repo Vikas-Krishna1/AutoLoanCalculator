@@ -1,8 +1,8 @@
-package src.ui.applicant;
+package ui.applicant;
 
-import src.db.DatabaseManager;
-import src.models.LoanApplication;
-import src.services.LoanCalculator;
+import db.DatabaseManager;
+import models.LoanApplication;
+import services.LoanCalculator;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

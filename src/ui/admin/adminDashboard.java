@@ -1,4 +1,4 @@
-package src.ui.admin;
+package ui.admin;
 
 public class adminDashboard {
     

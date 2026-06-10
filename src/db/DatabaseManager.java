@@ -1,4 +1,5 @@
-package src.db;
+package db;
+import io.github.cdimascio.dotenv.Dotenv;
 // ==========================
 // Database Manager
 // ==========================
@@ -10,11 +11,12 @@ package src.db;
 //  stored and retrieved.
 //=============================
 //Imports
-import src.models.Applicant;
-import src.models.Vehicle;
-import src.models.AutoLoan;
-import src.models.LoanApplication;
-import src.services.LoanCalculator;
+import io.github.cdimascio.dotenv.Dotenv;
+import models.Applicant;
+import models.Vehicle;
+import models.AutoLoan;
+import models.LoanApplication;
+import services.LoanCalculator;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +24,23 @@ import java.util.Optional;
 // ==========================
 public class DatabaseManager
 {
+private static final Dotenv dotenv =
+        Dotenv.configure()
+              .ignoreIfMissing()
+              .load();
 //DB connection details
 //URL format: jdbc:mysql://hostname:port/database_name
 //DB credentials-USER
 //URL
 private static final String URL =
-        System.getenv("DB_URL");
+        dotenv.get("DB_URL");
 
 //USER
 private static final String USER =
-        System.getenv("DB_USER");
+       dotenv.get("DB_USER");
 //PASSWORD
 private static final String PASSWORD =
-        System.getenv("DB_PASSWORD");
+        dotenv.get("DB_PASSWORD");
 //Check if env variables are loaded correctly
 public void printEnvVariables()
 {
@@ -974,6 +980,148 @@ public String getLoanOfficerName(int loanOfficerId)
     }
     return "";
 }
+//Get Tota lApplications
+//Retrieves the total number of loan applications from the database
+//Uses SQL prepared statements to query the database for the total number of loan applications
+//Returns the total number of loan applications as an integer
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public int getTotalApplications()
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application";
 
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return 0;
+}
+//Get Approved Applications
+//Retrieves the total number of approved loan applications from the database
+//Uses SQL prepared statements to query the database for the total number of approved loan applications
+//Returns the total number of approved loan applications as an integer
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public int getApprovedApplications()
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE status='Approved'";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return 0;   
+}
+//Get Denied Applications 
+//Retrieves the total number of denied loan applications from the database
+//Uses SQL prepared statements to query the database for the total number of denied loan applications
+//Returns the total number of denied loan applications as an integer
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public int getDeniedApplications()
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE status='Denied'";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return 0;
+}
+//Get Pending Applications
+//Retrieves the total number of pending loan applications from the database
+//Uses SQL prepared statements to query the database for the total number of pending loan applications
+//Returns the total number of pending loan applications as an integer
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public int getPendingApplicationCount()
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE status='Pending'";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return 0;
+}
+//Get Average LoanAmount for Approved Applications
+//Retrieves the average loan amount for approved loan applications from the database
+//Uses SQL prepared statements to query the database for the average loan amount for approved loan applications
+//Returns the average loan amount for approved loan applications as a double
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public double getAverageLoanAmount() {
+    String sql = "SELECT AVG(loan_amount) FROM loan_application WHERE status = 'Approved'";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getDouble(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+//
 
 }

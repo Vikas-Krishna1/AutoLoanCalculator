@@ -1,4 +1,4 @@
-package src.ui.officer;
+package ui.officer;
 
 public class reveiwApplications {
     

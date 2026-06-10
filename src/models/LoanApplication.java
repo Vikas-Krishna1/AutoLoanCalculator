@@ -1,4 +1,4 @@
-package src.models;
+package models;
 //LoanApplication Class==================
 //Represents a loan application with associated 
 // applicant, vehicle, and loan details

@@ -1,4 +1,4 @@
-package src.models;
+package models;
 //APPLICANT CLASS====================================
 //This class is used to create an applicant object that 
 //represents a person applying for a loan

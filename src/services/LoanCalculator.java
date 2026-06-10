@@ -1,5 +1,5 @@
-package src.services;
-import src.models.AutoLoan;
+package services;
+import models.AutoLoan;
 // ==========================
 // Loan Calculator Service
 // ==========================

@@ -1,4 +1,4 @@
-package src.models;
+package models;
 //LoanOfficer
 //This class represents a loan officer.
 
