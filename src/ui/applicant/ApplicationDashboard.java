@@ -16,7 +16,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-
+import src.ui.table.*;
 public class ApplicationDashboard extends JFrame
 {
     //Feilds, and variables and UI components
@@ -91,6 +91,8 @@ public class ApplicationDashboard extends JFrame
 
         applicationTable =
                 new JTable(tableModel);
+        applicationTable.getColumnModel().getColumn(1).setCellRenderer(new StatusRenderer());
+        
 
         add(
                 new JScrollPane(applicationTable),
@@ -114,7 +116,10 @@ public class ApplicationDashboard extends JFrame
 
         historyButton = new JButton("Application History");
         buttonPanel.add(historyButton);
-        historyButton.addActionListener(e -> new ApplicationHistoryView(userId));
+        historyButton.addActionListener(e -> 
+            
+            new ApplicationHistoryView(userId,this)
+        );
 
         add(buttonPanel, BorderLayout.SOUTH);
 

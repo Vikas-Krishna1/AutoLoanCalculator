@@ -5,6 +5,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import src.ui.table.*;
+
 //LOAN OFFICER APPLICATION QUEUE
 //This class represents the loan officer application queue view
 //It allows the loan officer to view and manage loan applications   
@@ -12,15 +14,34 @@ import java.util.List;
 public class ApplicationQueueView extends JFrame
 {
     //Components/Variables
+    private JTextField searchField;
+    private JButton searchButton;
     private JTable applicationTable;
     private DefaultTableModel tableModel;
     private JButton refreshButton;
     private JButton openButton;
     private JComboBox<String> statusFilter;
+    private JLabel totalLabel;
+    private JLabel pendingLabel;
+    private JLabel approvedLabel;
+    private JLabel deniedLabel;
     private DatabaseManager db;
+    int pending;
+    int approved;
+    int denied;
 //Constructor
     public ApplicationQueueView()
     {
+        JPanel statsPanel = new JPanel(new GridLayout(1,4));
+        totalLabel = new JLabel("Total: 0");
+pendingLabel = new JLabel("Pending: 0");
+approvedLabel = new JLabel("Approved: 0");
+deniedLabel = new JLabel("Denied: 0");
+
+statsPanel.add(totalLabel);
+statsPanel.add(pendingLabel);
+statsPanel.add(approvedLabel);
+statsPanel.add(deniedLabel);
         //DatabaseManager db = new DatabaseManager();
         db = new DatabaseManager();
 
@@ -28,8 +49,9 @@ public class ApplicationQueueView extends JFrame
         setSize(900, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    
     //Filters based on status of the loan application
-    statusFilter = new JComboBox<>(new String[] { "Pending", "Approved", "Declined" });
+    statusFilter = new JComboBox<>(new String[] { "All", "Pending", "Approved", "Declined" });
 
      statusFilter.addActionListener(e -> 
         loadApplications()
@@ -53,6 +75,7 @@ public class ApplicationQueueView extends JFrame
 
         String[] columns =
         {
+            "Officer ID",
             "Application ID",
             "Applicant",
             "Vehicle",
@@ -76,6 +99,9 @@ public class ApplicationQueueView extends JFrame
 
         applicationTable =
                 new JTable(tableModel);
+        applicationTable.getColumnModel()
+        .getColumn(5)
+        .setCellRenderer(new StatusRenderer());
 
         applicationTable.setRowHeight(25);
 
@@ -94,10 +120,14 @@ public class ApplicationQueueView extends JFrame
                 new JButton("Open Application");
 
         buttonPanel.add(refreshButton);
-        buttonPanel.add(refreshButton);
         buttonPanel.add(openButton);
         buttonPanel.add(statusFilter);
         buttonPanel.add(openButton);
+        searchField = new JTextField(20);
+        searchButton = new JButton("Search");
+        buttonPanel.add(new JLabel("Search"));      
+        buttonPanel.add(searchField);
+        buttonPanel.add(searchButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -114,7 +144,13 @@ public class ApplicationQueueView extends JFrame
         loadApplications();
 
         setVisible(true);
+    searchButton.addActionListener(e ->
+    {
+    searchApplications();
+    });
     }
+    
+    
 
 private void loadApplications()
 {
@@ -128,6 +164,7 @@ private void loadApplications()
         String selectedStatus =
                 (String) statusFilter.getSelectedItem();
 
+
         for(LoanApplication application : applications)
         {
             // Apply filter
@@ -137,6 +174,7 @@ private void loadApplications()
             {
                 continue;
             }
+            int OfficerID = db.getLoanOfficerId(application.getApplicationId());
 
             String applicantName =
                     application
@@ -159,6 +197,7 @@ private void loadApplications()
             tableModel.addRow(
                     new Object[]
                     {
+                        OfficerID,
                         application.getApplicationId(),
                         applicantName,
                         vehicleName,
@@ -180,6 +219,42 @@ private void loadApplications()
                 "Unable to load applications.");
     }
 }
+private void searchApplications()
+{
+    String keyword =
+            searchField.getText().trim();
+
+    if(keyword.isEmpty())
+    {
+        loadApplications();
+        return;
+    }
+
+    tableModel.setRowCount(0);
+
+    List<LoanApplication> applications =
+            db.searchApplications(keyword);
+
+    for(LoanApplication application : applications)
+    {
+        tableModel.addRow(
+                new Object[]
+                {
+                    db.getLoanOfficerId(application.getApplicationId()),
+                    application.getApplicationId(),
+                    application.getApplicant().getFullName(),
+                    application.getVehicle().getYear()
+                            + " "
+                            + application.getVehicle().getMake()
+                            + " "
+                            + application.getVehicle().getModel(),
+                    String.format(
+                            "$%.2f",
+                            application.getLoan().getAutoPrice()),
+                    application.getStatus()
+                });
+    }
+}
     private void openSelectedApplication()
     {
         int selectedRow =
@@ -198,11 +273,9 @@ private void loadApplications()
                 (Integer)
                         tableModel.getValueAt(
                                 selectedRow,
-                                0);
+                                1);
 
-         System.out.println(
-            "Opening application "
-                    + applicationId);
+     
 
         //Open loan officer view
         new LoanOfficerView(applicationId);

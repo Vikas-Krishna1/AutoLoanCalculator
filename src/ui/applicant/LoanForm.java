@@ -266,8 +266,7 @@ public class LoanForm extends JFrame
                             dobField.getText(),
                             ssnField.getText(),
                             employerField.getText());
-System.out.println("Applicant user_id = " +
-                   currentApplicant.getUserId());
+
 
             currentVehicle =
                     new Vehicle(

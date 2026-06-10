@@ -179,15 +179,7 @@ public class LoanOfficerView extends JFrame
                 int applicationId =
                         Integer.parseInt(
                                 applicationIdField.getText());
-System.out.println(
-        "Loading application "
-                + applicationId);
-                currentApplication =
-                        db.getLoanApplicationById(
-                                applicationId);
-        System.out.println(
-        "Loading application "
-                + applicationId);
+
 
                 if(currentApplication == null)
                 {

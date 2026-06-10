@@ -360,6 +360,102 @@ public LoanApplication getLoanApplicationById(int applicationId)
 
     return null;
 }
+//Get LaonApplicationFrom ID With Officer Data
+//Retrieves a loan application by its ID from the database
+// and returns it as a LoanApplication object and its officer data
+//Uses SQL prepared statements to retrieve loan application data
+// from the database and maps it to a LoanApplication object
+//Joins the loan_application, applicant, and vehicle tables
+// to get all related data in a single query
+//Returns the loan application as a LoanApplication object
+//Handles SQL exceptions that may occur during the retrieval process
+// and prints the stack trace for debugging
+public LoanApplication getLoanApplicationByIdWithOfficerData(int applicationId)
+{
+    String sql =
+            "SELECT * " +
+            "FROM loan_application " +
+            "JOIN applicant " +
+            "ON loan_application.applicant_id = applicant.applicant_id " +
+            "JOIN vehicle " +
+            "ON loan_application.vehicle_id = vehicle.vehicle_id " +
+            "WHERE loan_application.application_id = ?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt = conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, applicationId);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if(rs.next())
+        {
+            Applicant applicant =
+                    new Applicant(
+                            rs.getInt("user_id"),
+                            rs.getInt("applicant_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("phone"),
+                            rs.getString("address"),
+                            rs.getString("date_of_birth"),
+                            rs.getString("ssn"),
+                            rs.getString("employer_name")
+                    );
+
+            Vehicle vehicle =
+                    new Vehicle(
+                            rs.getInt("vehicle_id"),
+                            rs.getString("make"),
+                            rs.getString("model"),
+                            rs.getInt("year")
+                    );
+
+            AutoLoan loan =
+                    new AutoLoan(
+                            rs.getDouble("auto_price"),
+                            rs.getDouble("down_payment"),
+                            rs.getInt("loan_term"),
+                            rs.getDouble("interest_rate"),
+                            rs.getDouble("sales_tax"),
+                            rs.getDouble("fees"),
+                            rs.getDouble("cash_incentive")
+                    );
+
+            return new LoanApplication(
+                    0, // application_date for now
+                    rs.getString("status"),
+                    rs.getInt("application_id"),
+                    applicant,
+                    vehicle,
+                    loan,
+                    rs.getString("review_notes"),
+                    rs.getInt("reviewed_by")
+            );
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+public Date getLoanApplicationDate(int applicationId) {
+    String sql = "SELECT application_date FROM loan_application WHERE application_id = ?";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, applicationId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getDate("application_date");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
 public List<LoanApplication> getApplicationsByUserId(int userId)
 {
     // SQL query to join loan_application, applicant, and vehicle tables
@@ -718,6 +814,165 @@ public boolean assignLoanOfficer(
     }
 
     return false;       
+}
+//Search for Applications================================
+//Retrieves a list of loan applications from the database based on a search term
+//Uses SQL prepared statements to query the database for loan applications
+// that match the search term and maps the results to a list of LoanApplication objects
+//Returns a list of loan applications as LoanApplication objects
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public List<LoanApplication> searchApplications(
+        String keyword)
+{
+    String sql =
+            "SELECT * " +
+            "FROM loan_application " +
+            "JOIN applicant " +
+            "ON loan_application.applicant_id = applicant.applicant_id " +
+            "JOIN vehicle " +
+            "ON loan_application.vehicle_id = vehicle.vehicle_id " +
+            "WHERE CAST(loan_application.application_id AS CHAR) LIKE ? " +
+            "OR full_name LIKE ? " +
+            "OR make LIKE ? " +
+            "OR model LIKE ?";
+
+    List<LoanApplication> applications =
+            new ArrayList<>();
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        String search =
+                "%" + keyword + "%";
+
+        stmt.setString(1, search);
+        stmt.setString(2, search);
+        stmt.setString(3, search);
+        stmt.setString(4, search);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+       while(rs.next())
+{
+    Applicant applicant =
+            new Applicant(
+                    rs.getInt("user_id"),
+                    rs.getInt("applicant_id"),
+                    rs.getString("full_name"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("address"),
+                    rs.getString("date_of_birth"),
+                    rs.getString("ssn"),
+                    rs.getString("employer_name")
+            );
+
+    Vehicle vehicle =
+            new Vehicle(
+                    rs.getInt("vehicle_id"),
+                    rs.getString("make"),
+                    rs.getString("model"),
+                    rs.getInt("year")
+            );
+
+    AutoLoan loan =
+            new AutoLoan(
+                    rs.getDouble("auto_price"),
+                    rs.getDouble("down_payment"),
+                    rs.getInt("loan_term"),
+                    rs.getDouble("interest_rate"),
+                    rs.getDouble("sales_tax"),
+                    rs.getDouble("fees"),
+                    rs.getDouble("cash_incentive")
+            );
+
+    LoanApplication application =
+            new LoanApplication(
+                    rs.getString("status"),
+                    rs.getInt("application_id"),
+                    applicant,
+                    vehicle,
+                    loan
+            );
+
+    applications.add(application);
+}
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    System.out.println(applications);
+    return applications;
+}
+//Get Officer ID from Application================================
+//Retrieves the loan officer ID associated with a loan application from the database
+//Uses SQL prepared statements to query the database for the loan officer ID based on the application ID
+//Returns the loan officer ID as an integer
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public int getLoanOfficerId(int applicationId)
+{
+    String sql =
+            "SELECT reviewed_by " +
+            "FROM loan_application " +
+            "WHERE application_id=?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, applicationId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt("reviewed_by");
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return 0;
+}
+//Get OfficerName form ID
+//Retrieves the loan officer name associated with a loan officer ID from the database
+//Uses SQL prepared statements to query the database for the loan officer name based on the loan officer ID
+//Returns the loan officer name as a string
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public String getLoanOfficerName(int loanOfficerId)
+{
+    String sql =
+            "SELECT full_name " +
+            "FROM loan_officer " +
+            "WHERE loan_officer_id=?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, loanOfficerId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getString("full_name");
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return "";
 }
 
 

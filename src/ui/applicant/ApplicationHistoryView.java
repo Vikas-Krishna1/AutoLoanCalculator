@@ -12,6 +12,7 @@ import java.util.List;
 public class ApplicationHistoryView extends JFrame
 {
     private int userId;
+    private JFrame dashboard;
 
     private JTable historyTable;
     private DefaultTableModel tableModel;
@@ -24,9 +25,10 @@ public class ApplicationHistoryView extends JFrame
 
     private DatabaseManager db;
 
-    public ApplicationHistoryView(int userId)
+    public ApplicationHistoryView(int userId,JFrame dashboard)
     {
         this.userId = userId;
+        this.dashboard = dashboard; 
         this.db = new DatabaseManager();
 
         setTitle("Application History");
@@ -51,7 +53,9 @@ public class ApplicationHistoryView extends JFrame
 
         String[] columns =
         {
+            "Date",
             "Application ID",
+            "Applicant",
             "Vehicle",
             "Loan Amount",
             "Monthly Payment",
@@ -132,7 +136,10 @@ public class ApplicationHistoryView extends JFrame
 
         setVisible(true);
         backButton.addActionListener(e->
-                new ApplicationDashboard(userId).setVisible(true)
+        {
+            dashboard.setVisible(true);
+            this.dispose();
+        }
                 
         );
     }
@@ -172,7 +179,10 @@ public class ApplicationHistoryView extends JFrame
                 tableModel.addRow(
                         new Object[]
                         {
+                            db.getLoanApplicationDate(application.getApplicationId()),
                             application.getApplicationId(),
+
+                            application.getApplicant().getFullName(),
 
                             vehicleName,
 
