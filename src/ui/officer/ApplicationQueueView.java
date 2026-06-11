@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 import ui.table.*;
+import ui.officer.*;
 
 //LOAN OFFICER APPLICATION QUEUE
 //This class represents the loan officer application queue view
@@ -81,7 +82,8 @@ statsPanel.add(deniedLabel);
             "Applicant",
             "Vehicle",
             "Loan Amount",
-            "Status"
+            "Status",
+            "Assigned Officer"
         };
 
         tableModel =
@@ -129,6 +131,7 @@ statsPanel.add(deniedLabel);
         buttonPanel.add(new JLabel("Search"));      
         buttonPanel.add(searchField);
         buttonPanel.add(searchButton);
+       
 
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -157,8 +160,40 @@ buttonPanel.add(statsButton);
 statsButton.addActionListener(e ->
 {
     new officerStatsView();
+}); 
+JButton assignButton =
+        new JButton("Assign To Me");
+
+assignButton.addActionListener(e ->
+{
+    db.assignApplication(
+           (int) applicationTable.getValueAt(
+                   applicationTable.getSelectedRow(),
+                   1
+           ) ,
+           (int) applicationTable.getValueAt(
+                    applicationTable.getSelectedRow(),
+                    0
+            ));
+
+    JOptionPane.showMessageDialog(
+            this,
+            "Application Assigned");
 });
-    }
+
+buttonPanel.add(assignButton);
+
+JButton dashboardButton =
+        new JButton("Dashboard");
+ dashboardButton.addActionListener(e ->
+{
+        this.setVisible(false);
+    new loanOfficerDashboard(1,this);
+});
+
+buttonPanel.add(dashboardButton);
+    
+}
     
     
 
@@ -185,6 +220,9 @@ private void loadApplications()
                 continue;
             }
             int OfficerID = db.getLoanOfficerId(application.getApplicationId());
+             int assignedOfficer =
+        db.getAssignedOfficerId(
+                application.getApplicationId());
 
             String applicantName =
                     application
@@ -208,6 +246,7 @@ private void loadApplications()
                     new Object[]
                     {
                         OfficerID,
+                        
                         application.getApplicationId(),
                         applicantName,
                         vehicleName,
@@ -216,7 +255,10 @@ private void loadApplications()
                                 application
                                         .getLoan()
                                         .getAutoPrice()),
-                        application.getStatus()
+                        application.getStatus(),
+                        assignedOfficer == 0
+                    ? "Unassigned"
+                    : "Officer #" + assignedOfficer
                     });
         }
     }

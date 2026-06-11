@@ -2,6 +2,7 @@ package Main;
 import javax.swing.SwingUtilities;
 import db.DatabaseManager;
 import ui.applicant.ApplicationDashboard;
+import ui.officer.loanOfficerDashboard;
 import ui.applicant.LoanForm;
 import ui.officer.ApplicationQueueView;
 import ui.officer.LoanOfficerView;

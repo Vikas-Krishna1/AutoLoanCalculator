@@ -1122,6 +1122,303 @@ public double getAverageLoanAmount() {
     }
     return 0;
 }
-//
+//Get Assigned Officer
+//Retrieves the loan officer assigned to a loan application from the database
+//Uses SQL prepared statements to query the database for the loan officer assigned to a loan application
+//Returns the loan officer assigned to the loan application as a string
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging
+// ==========================
+public int getAssignedOfficerId(
+        int applicationId)
+{
+    String sql =
+            "SELECT assigned_officer_id " +
+            "FROM loan_application " +
+            "WHERE application_id = ?";
 
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, applicationId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(
+                    "assigned_officer_id");
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+//Get Assigned Count
+public int getAssignedCount(int officerId)
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE loan_officer=?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1,officerId);
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+    return 0;
+}
+public int getPendingApplicationCount(int officerId) {
+    String sql = "SELECT COUNT(*) FROM loan_application WHERE loan_officer = ? AND status = 'Pending'";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, officerId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+//Assign Application to Officer by officerId
+//Assigns a loan application to a loan officer by updating the loan_officer column in the loan_application table
+//Uses SQL prepared statements to update the loan_officer column in the loan_application table
+//Handles SQL exceptions that may occur during the update process and prints the stack trace for debugging
+// ==========================
+public void assignApplication(
+        int applicationId,
+        int officerId)
+{
+    String sql =
+            "UPDATE loan_application " +
+            "SET assigned_officer_id = ? " +
+            "WHERE application_id = ?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+        stmt.setInt(2, applicationId);
+
+        stmt.executeUpdate();
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+}
+public List<LoanApplication> getAssignedApplications(
+        int officerId)
+{
+    String sql =
+            "SELECT * " +
+            "FROM loan_application " +
+            "JOIN applicant " +
+            "ON loan_application.applicant_id = applicant.applicant_id " +
+            "JOIN vehicle " +
+            "ON loan_application.vehicle_id = vehicle.vehicle_id " +
+            "WHERE assigned_officer_id = ?";
+
+    List<LoanApplication> applications =
+            new ArrayList<>();
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        while(rs.next())
+        {
+            Applicant applicant =
+                    new Applicant(
+                            rs.getInt("user_id"),
+                            rs.getInt("applicant_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("phone"),
+                            rs.getString("address"),
+                            rs.getString("date_of_birth"),
+                            rs.getString("ssn"),
+                            rs.getString("employer_name")
+                    );
+
+            Vehicle vehicle =
+                    new Vehicle(
+                            rs.getInt("vehicle_id"),
+                            rs.getString("make"),
+                            rs.getString("model"),
+                            rs.getInt("year")
+                    );
+
+            AutoLoan loan =
+                    new AutoLoan(
+                            rs.getDouble("auto_price"),
+                            rs.getDouble("down_payment"),
+                            rs.getInt("loan_term"),
+                            rs.getDouble("interest_rate"),
+                            rs.getDouble("sales_tax"),
+                            rs.getDouble("fees"),
+                            rs.getDouble("cash_incentive")
+                    );
+
+            LoanApplication application =
+                    new LoanApplication(
+                            rs.getString("status"),
+                            rs.getInt("application_id"),
+                            applicant,
+                            vehicle,
+                            loan
+                    );
+
+            applications.add(application);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return applications;
+}
+public int getAssignedApplicationsCount(int officerId)
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE assigned_officer_id = ?";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+public int getApprovedApplicationsCount(int officerId)
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE assigned_officer_id = ? " +
+            "AND status = 'APPROVED'";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+public int getDeniedApplicationsCount(int officerId)
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE assigned_officer_id = ? " +
+            "AND status = 'DENIED'";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+public int getPendingApplicationsCount(int officerId)
+{
+    String sql =
+            "SELECT COUNT(*) " +
+            "FROM loan_application " +
+            "WHERE assigned_officer_id = ? " +
+            "AND status = 'PENDING'";
+
+    try(Connection conn = connect();
+        PreparedStatement stmt =
+                conn.prepareStatement(sql))
+    {
+        stmt.setInt(1, officerId);
+
+        ResultSet rs =
+                stmt.executeQuery();
+
+        if(rs.next())
+        {
+            return rs.getInt(1);
+        }
+    }
+    catch(SQLException e)
+    {
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+
+     
 }
