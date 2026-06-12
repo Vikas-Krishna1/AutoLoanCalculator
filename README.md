@@ -2,282 +2,193 @@
 
 ## Overview
 
-The Auto Loan Management System is a Java-based desktop application that streamlines the vehicle financing process by allowing users to create, calculate, and manage auto loan applications. The system captures applicant information, vehicle details, and loan request data, automatically computes loan amounts and monthly payments, and stores application records in a MySQL database for future review and processing.
+The Auto Loan Management System is a Java desktop application designed to streamline the automobile loan application process for applicants, loan officers, and administrators. The system provides role-based access, allowing users to securely submit, review, and manage loan applications through an intuitive graphical interface built with Java Swing.
 
-The project demonstrates object-oriented design principles, database integration, user interface development, and financial calculation logic within a layered software architecture.
+The application follows an object-oriented design and integrates with a MySQL database to maintain persistent records of users, applicants, vehicles, loans, and application statuses. Passwords are securely stored using BCrypt hashing to enhance authentication security.
 
 ---
 
 ## Features
 
-### Applicant Management
+### Applicant Portal
 
-* Capture applicant information
+* Secure registration and login
+* Submit new auto loan applications
+* Automatic loan amount and monthly payment calculations
+* View current applications
+* Access application history
+* Review detailed application information
 
-  * Full Name
-  * Email
-  * Phone Number
-  * Address
-  * Date of Birth
-  * Social Security Number
-  * Employer Information
+### Loan Officer Portal
 
-### Vehicle Management
+* View application queue
+* Assign applications to themselves
+* Manage only assigned applications
+* Monitor approval statistics
+* Dashboard with performance metrics
+* Export reports to PDF
 
-* Store vehicle details
+### Authentication and Security
 
-  * Make
-  * Model
-  * Year
-
-### Loan Processing
-
-* Auto price input
-* Down payment tracking
-* Interest rate calculations
-* Sales tax handling
-* Additional fees
-* Cash incentive adjustments
-* Monthly payment calculations
-* Total loan amount calculations
-
-### Database Persistence
-
-* Store applicant records
-* Store vehicle records
-* Store loan applications
-* Maintain relationships using foreign keys
-
-### Future Enhancements
-
-* Loan approval workflow
-* Credit score integration
-* Application status tracking
-* Reporting dashboard
+* BCrypt password hashing
+* Session management
 * Role-based access control
-* Export to PDF and Excel
+* Secure login validation
+
+### Application Processing
+
+* Applicant information management
+* Vehicle information management
+* Auto loan calculations
+* Status tracking
+* Search and filtering capabilities
 
 ---
 
-## System Architecture
+## Tech Stack
 
-```text
-Applicant
-    │
-    ▼
-Applicant Form
-    │
-    ▼
-Loan Calculator Service
-    │
-    ▼
-Database Manager
-    │
-    ▼
-MySQL Database
-```
+### Language
 
-### Project Structure
+* Java
 
-```text
-AutoLoanCalc
-│
-├── Main.java
-│
-└── src
-    ├── db
-    │   └── DatabaseManager.java
-    │
-    ├── models
-    │   ├── Applicant.java
-    │   ├── Vehicle.java
-    │   ├── AutoLoan.java
-    │   └── LoanApplication.java
-    │
-    ├── services
-    │   └── LoanCalculator.java
-    │
-    └── ui
-        └── LoanForm.java
-```
+### GUI Framework
 
----
+* Java Swing
 
-## Technology Stack
+### Database
 
-| Component             | Technology         |
-| --------------------- | ------------------ |
-| Programming Language  | Java 21            |
-| User Interface        | Java Swing         |
-| Database              | MySQL 9            |
-| Database Connectivity | JDBC               |
-| Version Control       | Git                |
-| Repository Hosting    | GitHub             |
-| IDE                   | Visual Studio Code |
+* MySQL
 
----
+### Database Connectivity
 
-## Database Design
+* JDBC
 
-### Applicant Table
+### Security
 
-```sql
-CREATE TABLE applicant (
-    applicant_id INT AUTO_INCREMENT PRIMARY KEY,
-    full_name VARCHAR(100),
-    email VARCHAR(100),
-    phone VARCHAR(20),
-    address VARCHAR(255),
-    date_of_birth DATE,
-    ssn VARCHAR(20),
-    employer_name VARCHAR(100)
-);
-```
+* jBCrypt
 
-### Vehicle Table
+### PDF Reporting
 
-```sql
-CREATE TABLE vehicle (
-    vehicle_id INT AUTO_INCREMENT PRIMARY KEY,
-    make VARCHAR(50),
-    model VARCHAR(50),
-    year INT
-);
-```
+* iText PDF
 
-### Loan Application Table
+### Build Tool
 
-```sql
-CREATE TABLE loan_application (
-    application_id INT AUTO_INCREMENT PRIMARY KEY,
-    applicant_id INT,
-    vehicle_id INT,
-    auto_price DECIMAL(12,2),
-    down_payment DECIMAL(12,2),
-    loan_term INT,
-    interest_rate DECIMAL(5,2),
-    sales_tax DECIMAL(5,2),
-    fees DECIMAL(12,2),
-    cash_incentive DECIMAL(12,2),
-    loan_amount DECIMAL(12,2),
-    monthly_payment DECIMAL(12,2),
-    application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+* Maven
 
-    FOREIGN KEY (applicant_id)
-        REFERENCES applicant(applicant_id),
-
-    FOREIGN KEY (vehicle_id)
-        REFERENCES vehicle(vehicle_id)
-);
-```
-
----
-
-## Financial Calculations
-
-### Loan Amount
-
-```text
-Loan Amount =
-(Auto Price - Cash Incentive)
-- Down Payment
-```
-
-### Monthly Payment
-
-The system uses the standard amortized loan payment formula:
-
-```text
-M = P × r / (1 - (1 + r)^(-n))
-```
-
-Where:
-
-* M = Monthly Payment
-* P = Principal Loan Amount
-* r = Monthly Interest Rate
-* n = Number of Payments
-
----
-
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/your-username/AutoLoanManagementSystem.git
-cd AutoLoanManagementSystem
-```
-
-### Compile
-
-```bash
-javac -cp ".:lib/*" $(find src -name "*.java") Main.java
-```
-
-### Run
-
-```bash
-java -cp ".:lib/*:src" Main
-```
-
----
-
-## Sample Test Data
-
-### Applicant
-
-```text
-Name: John Smith
-Email: john.smith@email.com
-Phone: 555-123-4567
-Address: 123 Main Street
-DOB: 1990-05-12
-SSN: 123-45-6789
-Employer: Tech Solutions Inc.
-```
-
-### Vehicle
-
-```text
-Make: Toyota
-Model: Camry
-Year: 2024
-```
-
-### Loan
-
-```text
-Auto Price: 35000
-Down Payment: 5000
-Loan Term: 5
-Interest Rate: 6.5
-Sales Tax: 8.25
-Fees: 500
-Cash Incentive: 1000
-```
-
----
-
-## Learning Outcomes
-
-This project demonstrates:
+### Architecture
 
 * Object-Oriented Programming (OOP)
-* Java Swing GUI Development
-* JDBC Database Connectivity
-* Relational Database Design
-* Financial Calculation Algorithms
-* Software Architecture and Layering
-* CRUD Operations
-* Version Control with Git and GitHub
+* MVC-inspired design
+
+---
+
+## Project Structure
+
+```
+src
+├── db
+│   └── DatabaseManager.java
+├── models
+│   ├── Applicant.java
+│   ├── AutoLoan.java
+│   ├── LoanApplication.java
+│   ├── User.java
+│   └── Vehicle.java
+├── services
+│   └── LoanCalculator.java
+├── ui
+│   ├── login
+│   ├── register
+│   ├── applicant
+│   ├── officer
+│   ├── admin
+│   └── table
+├── utils
+│   ├── passwordUtils.java
+│   └── PDFExporter.java
+└── Main
+    └── Main.java
+```
+
+---
+
+## Database Tables
+
+* users
+* applicant
+* vehicle
+* auto_loan
+* loan_application
+* loan_officer
+* admin
+
+---
+
+## Major Concepts Implemented
+
+* Encapsulation
+* Inheritance
+* Composition
+* Separation of concerns
+* Event-driven programming
+* JDBC database operations
+* Password hashing
+* Session management
+* Input validation
+* PDF generation
+
+---
+
+## Running the Project
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/AutoLoanCalc.git
+```
+
+### Navigate to the Project
+
+```bash
+cd AutoLoanCalc
+```
+
+### Install Dependencies
+
+```bash
+mvn clean install
+```
+
+### Run the Application
+
+```bash
+mvn exec:java -Dexec.mainClass="src.Main.Main"
+```
+
+---
+
+## Future Enhancements
+
+* Admin dashboard and user management
+* Reassign applications between loan officers
+* Email notifications
+* Credit score integration
+* Advanced reporting and analytics
+* Search optimization
+* REST API support
+* Migration to JavaFX or web-based frontend
 
 ---
 
 ## Author
 
-Vikas Krishna
+**Vikas S. Krishna**
 
-Computer Science Student
+B.S. Computer Science
+Stony Brook University
 
-Developed as a practical software engineering and database systems project to model a real-world auto loan processing workflow.
+---
+
+## License
+
+This project is intended for educational purposes and portfolio demonstration.
