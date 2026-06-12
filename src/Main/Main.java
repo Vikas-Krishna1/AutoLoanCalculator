@@ -8,6 +8,8 @@ import ui.officer.ApplicationQueueView;
 import ui.officer.LoanOfficerView;
 import javax.swing.JOptionPane;
 import java.sql.*;
+import ui.login.*;
+import utils.passwordUtils;
 //MAIN CLASS
 //This Class is the entry point of the application
 public class Main
@@ -26,32 +28,9 @@ public class Main
     //Opens the view
     public static void openView()
     {
-        SwingUtilities.invokeLater(() ->
-        {
-            String[] options =
-            {
-                "Applicant",
-                "Loan Officer"
-            };
-
-            int choice =
-                    JOptionPane.showOptionDialog(
-                            null,
-                            "Select View",
-                            "Auto Loan System",
-                            JOptionPane.DEFAULT_OPTION,
-                            JOptionPane.INFORMATION_MESSAGE,
-                            null,
-                            options,
-                            options[0]);
-
-            if(choice == 0)
-            {
-                new ApplicationDashboard(user_id);
-            }
-            else if(choice == 1)
-            {
-                new ApplicationQueueView();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new LoginView();
             }
         });
     }

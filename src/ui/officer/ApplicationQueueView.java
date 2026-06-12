@@ -4,9 +4,12 @@ import models.LoanApplication;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import ui.table.*;
+import ui.login.LoginView;
 import ui.officer.*;
+import ui.Session;
 
 //LOAN OFFICER APPLICATION QUEUE
 //This class represents the loan officer application queue view
@@ -27,13 +30,40 @@ public class ApplicationQueueView extends JFrame
     private JLabel approvedLabel;
     private JLabel deniedLabel;
     private JButton StatsButton;
+    private JLabel welcomeLabel;
+    private JLabel officerIdLabel;
+    private JLabel roleLabel;
+    private JLabel sessionLabel;
+    private JLabel lastLoginLabel;
     private DatabaseManager db;
     int pending;
     int approved;
     int denied;
+    private int officerId;
 //Constructor
-    public ApplicationQueueView()
+    public ApplicationQueueView(int officerId)
     {
+        this.officerId = officerId;
+        System.out.println("Officer ID :" + officerId);
+        welcomeLabel =
+        new JLabel(
+                "Welcome, " + Session.getCurrentUser().getUsername());
+
+officerIdLabel =
+        new JLabel(
+                "Officer ID: " + officerId);
+
+roleLabel =
+        new JLabel(
+                "Role: Loan Officer");
+
+sessionLabel =
+        new JLabel(
+                "Session: Active");
+
+lastLoginLabel =
+        new JLabel(
+                "Last Login: " + LocalDateTime.now());
         JPanel statsPanel = new JPanel(new GridLayout(1,4));
         totalLabel = new JLabel("Total: 0");
 pendingLabel = new JLabel("Pending: 0");
@@ -125,7 +155,6 @@ statsPanel.add(deniedLabel);
         buttonPanel.add(refreshButton);
         buttonPanel.add(openButton);
         buttonPanel.add(statusFilter);
-        buttonPanel.add(openButton);
         searchField = new JTextField(20);
         searchButton = new JButton("Search");
         buttonPanel.add(new JLabel("Search"));      
@@ -166,34 +195,113 @@ JButton assignButton =
 
 assignButton.addActionListener(e ->
 {
+    int selectedRow = applicationTable.getSelectedRow();
+
+    if(selectedRow == -1)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Select an application first.");
+        return;
+    }
+
+    int applicationId =
+            (Integer) tableModel.getValueAt(
+                    selectedRow,
+                    1);
+
     db.assignApplication(
-           (int) applicationTable.getValueAt(
-                   applicationTable.getSelectedRow(),
-                   1
-           ) ,
-           (int) applicationTable.getValueAt(
-                    applicationTable.getSelectedRow(),
-                    0
-            ));
+            applicationId,
+            officerId);      // <-- logged-in officer
 
     JOptionPane.showMessageDialog(
             this,
-            "Application Assigned");
+            "Application assigned to Officer #" + officerId);
+
+    loadApplications();
 });
 
 buttonPanel.add(assignButton);
+JButton reassignButton =
+        new JButton("Reassign");
+
+reassignButton.addActionListener(e ->
+{
+    int row =
+            applicationTable.getSelectedRow();
+
+    if(row == -1)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                "Select an application first");
+
+        return;
+    }
+
+    int applicationId =
+            (Integer)tableModel.getValueAt(
+                    row,
+                    1);
+
+    String officerIdStr =
+            JOptionPane.showInputDialog(
+                    this,
+                    "Enter new officer ID");
+
+    if(officerIdStr == null)
+        return;
+
+    int newOfficerId =
+            Integer.parseInt(officerIdStr);
+
+    db.reassignApplication(
+            applicationId,
+            newOfficerId);
+
+    loadApplications();
+
+    JOptionPane.showMessageDialog(
+            this,
+            "Application reassigned");
+});
+buttonPanel.add(reassignButton);
 
 JButton dashboardButton =
         new JButton("Dashboard");
  dashboardButton.addActionListener(e ->
 {
         this.setVisible(false);
-    new loanOfficerDashboard(1,this);
+    new loanOfficerDashboard(officerId,this);
 });
 
 buttonPanel.add(dashboardButton);
+JButton logoutButton = new JButton("Logout");
+
+logoutButton.addActionListener(e ->
+{
+    int choice =
+            JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to logout?",
+                    "Logout",
+                    JOptionPane.YES_NO_OPTION);
+
+    if(choice == JOptionPane.YES_OPTION)
+    {
+         Session.clearSession();
+
+    dispose();
+
+    new LoginView();
+    }
+});
+buttonPanel.add(logoutButton);
     
 }
+
+
+
     
     
 
@@ -256,7 +364,7 @@ private void loadApplications()
                                         .getLoan()
                                         .getAutoPrice()),
                         application.getStatus(),
-                        assignedOfficer == 0
+                        assignedOfficer <= 0
                     ? "Unassigned"
                     : "Officer #" + assignedOfficer
                     });

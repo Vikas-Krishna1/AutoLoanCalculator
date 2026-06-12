@@ -4,7 +4,8 @@ package ui.officer;
 import db.DatabaseManager;
 import javax.swing.*;
 import javax.xml.crypto.Data;
-
+import utils.PDFExporter;
+import java.io.File;
 import java.awt.*;
 
 public class loanOfficerDashboard extends JFrame
@@ -154,7 +155,7 @@ public class loanOfficerDashboard extends JFrame
         queueButton.addActionListener(e ->
         {
             // TODO
-            new ApplicationQueueView();
+            new ApplicationQueueView(officerId);
         });
 
         myApplicationsButton.addActionListener(e ->
@@ -163,13 +164,29 @@ public class loanOfficerDashboard extends JFrame
             new MyApplicationsView(1,this);
         });
 
-        exportButton.addActionListener(e ->
-        {
-            // TODO
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Export Report Coming Soon");
-        });
+       JButton exportButton = new JButton("Export PDF");
+
+exportButton.addActionListener(e ->
+{
+    JFileChooser chooser =
+            new JFileChooser();
+
+    chooser.setSelectedFile(
+            new File(
+                    "All_Applications.pdf"));
+
+    if(chooser.showSaveDialog(this)
+            == JFileChooser.APPROVE_OPTION)
+    {
+        DatabaseManager db =
+                new DatabaseManager();
+
+        PDFExporter.exportAllApplications(
+                db.getAllApplications(),
+                chooser.getSelectedFile()
+                        .getAbsolutePath());
+    }
+});
 
         refreshButton.addActionListener(e ->
         {
@@ -193,7 +210,6 @@ public class loanOfficerDashboard extends JFrame
     {
         DatabaseManager db = new DatabaseManager();
 
-      int officerId = 1; // replace with logged-in officer
 
     int assigned =
             db.getAssignedApplicationsCount(officerId);

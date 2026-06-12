@@ -126,8 +126,12 @@ public class ApplicationDashboard extends JFrame
         refreshButton.addActionListener(
                 e -> loadApplications());
 
-        newApplicationButton.addActionListener(
-                e -> new LoanForm(userId));
+        newApplicationButton.addActionListener(e -> 
+                {
+                System.out.println("Opening new application form");
+                new LoanForm(userId);
+                System.out.println("New application form opened");
+                });
 
         viewButton.addActionListener(
                 e -> viewSelectedApplication());

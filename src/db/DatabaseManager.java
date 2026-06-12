@@ -17,10 +17,12 @@ import models.Vehicle;
 import models.AutoLoan;
 import models.LoanApplication;
 import services.LoanCalculator;
+import models.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import utils.passwordUtils;
 // ==========================
 public class DatabaseManager
 {
@@ -132,8 +134,6 @@ public int saveApplicant(Applicant applicant) throws SQLException
         stmt.setString(6, applicant.getDateOfBirth());
         stmt.setString(7, applicant.getSSN());
         stmt.setString(8, applicant.getEmployerName());
-        System.out.println("Applicant user_id = " + applicant.getUserId());
-        System.out.println("Applicant name = " + applicant.getFullName());
         //Execute the SQL statement
         stmt.executeUpdate();
         //REsult set
@@ -313,7 +313,6 @@ public LoanApplication getLoanApplicationById(int applicationId)
 
         if (rs.next())
         {
-            System.out.println("Found application");
             Applicant applicant =
                     new Applicant(
                             rs.getInt("user_id"),
@@ -326,7 +325,7 @@ public LoanApplication getLoanApplicationById(int applicationId)
                             rs.getString("ssn"),
                             rs.getString("employer_name")
                     );
-                     System.out.println("Applicant loaded");
+
 
             Vehicle vehicle =
                     new Vehicle(
@@ -335,7 +334,6 @@ public LoanApplication getLoanApplicationById(int applicationId)
                             rs.getString("model"),
                             rs.getInt("year")
                     );
-        System.out.println("Vehicle loaded");
             AutoLoan loan =
                     new AutoLoan(
                             rs.getDouble("auto_price"),
@@ -346,7 +344,7 @@ public LoanApplication getLoanApplicationById(int applicationId)
                             rs.getDouble("fees"),
                             rs.getDouble("cash_incentive")
                     );
-                        System.out.println("Loan loaded");
+
 
 
             return new LoanApplication(
@@ -485,7 +483,6 @@ public List<LoanApplication> getApplicationsByUserId(int userId)
 
         while (rs.next())
         {
-            System.out.println("Found application");
             Applicant applicant =
                     new Applicant(
                             rs.getInt("user_id"),
@@ -498,7 +495,7 @@ public List<LoanApplication> getApplicationsByUserId(int userId)
                             rs.getString("ssn"),
                             rs.getString("employer_name")
                     );
-                     System.out.println("Applicant loaded");    
+   
 
             Vehicle vehicle =
                     new Vehicle(
@@ -507,7 +504,7 @@ public List<LoanApplication> getApplicationsByUserId(int userId)
                             rs.getString("model"),
                             rs.getInt("year")
                     );
-        System.out.println("Vehicle loaded");
+
             AutoLoan loan =
                     new AutoLoan(
                             rs.getDouble("auto_price"),
@@ -518,7 +515,6 @@ public List<LoanApplication> getApplicationsByUserId(int userId)
                             rs.getDouble("fees"),
                             rs.getDouble("cash_incentive")
                     );
-                        System.out.println("Loan loaded");
 
             LoanApplication application =
                     new LoanApplication(
@@ -911,7 +907,6 @@ public List<LoanApplication> searchApplications(
     {
         e.printStackTrace();
     }
-    System.out.println(applications);
     return applications;
 }
 //Get Officer ID from Application================================
@@ -1419,6 +1414,90 @@ public int getPendingApplicationsCount(int officerId)
 
     return 0;
 }
+//Reassign Application
+public void reassignApplication(int applicationId, int officerId) {
+    String sql = "UPDATE loan_application SET assigned_officer_id = ? WHERE application_id = ?";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, officerId);
+        stmt.setInt(2, applicationId);
+        stmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+//Get all Officers
+public List<User> getAllOfficers() {
+    String sql = "SELECT * FROM users WHERE role = 'OFFICER'";
+    List<User> officers = new ArrayList<>();
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            officers.add(new User(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("role")));
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return officers;
+}
 
+
+//================================================
+//USER SIDE METHODS
+//================================================
+//Login Methods =======================
+//Retrieves a user's information from the database based on their username and password
+//Uses SQL prepared statements to query the database for a user's information
+//Returns a User object containing the user's information
+//Handles SQL exceptions that may occur during the retrieval process and prints the stack trace for debugging purposes
+public User login (String username, String password) {
+    String sql = "SELECT * FROM users WHERE username = ? ";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, username);
+        ResultSet rs = stmt.executeQuery();
+        if(rs.next())
+{
+    String storedHash =
+            rs.getString("password");
+
+    if(passwordUtils.checkPassword(
+            password,
+            storedHash))
+    {
+        return new User(
+                rs.getInt("user_id"),
+                rs.getString("username"),
+                storedHash,
+                rs.getString("role"));
+    }
+}
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+//Register
+public boolean registerUser(String username , String password, String role)
+{
+    String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, username);
+        stmt.setString(2, password);
+        stmt.setString(3, role);
+        stmt.executeUpdate();
+        return true;
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+    
+}
      
 }

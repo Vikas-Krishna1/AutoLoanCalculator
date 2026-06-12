@@ -45,51 +45,58 @@ public class LoanForm extends JFrame
     private Vehicle currentVehicle;
     private AutoLoan currentLoan;
 
-    public LoanForm(int user_id)
-    {
-        this.user_id = user_id;
-        setTitle("Auto Loan Application");
-        setSize(850, 850);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+   public LoanForm(int user_id)
+{
+    this.user_id = user_id;
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBorder(new EmptyBorder(10,10,10,10));
+    setTitle("New Loan Application");
+    setSize(800,700);
+    setLocationRelativeTo(null);
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JLabel title =
-                new JLabel(
-                        "AUTO LOAN APPLICATION",
-                        SwingConstants.CENTER);
+    JPanel mainPanel = new JPanel();
+    mainPanel.setLayout(
+            new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+    mainPanel.setBorder(
+            new EmptyBorder(10,10,10,10));
 
-        title.setFont(
-                new Font("Arial",
-                        Font.BOLD,
-                        22));
+    JLabel title =
+            new JLabel(
+                    "AUTO LOAN APPLICATION",
+                    SwingConstants.CENTER);
 
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+    title.setFont(
+            new Font(
+                    "Arial",
+                    Font.BOLD,
+                    22));
 
-        mainPanel.add(title);
-        mainPanel.add(Box.createVerticalStrut(10));
+    title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        mainPanel.add(createApplicantPanel());
-        mainPanel.add(Box.createVerticalStrut(10));
+    mainPanel.add(title);
+    mainPanel.add(Box.createVerticalStrut(10));
 
-        mainPanel.add(createVehiclePanel());
-        mainPanel.add(Box.createVerticalStrut(10));
+    mainPanel.add(createApplicantPanel());
+    mainPanel.add(Box.createVerticalStrut(10));
 
-        mainPanel.add(createLoanPanel());
-        mainPanel.add(Box.createVerticalStrut(10));
+    mainPanel.add(createVehiclePanel());
+    mainPanel.add(Box.createVerticalStrut(10));
 
-        mainPanel.add(createResultsPanel());
-        mainPanel.add(Box.createVerticalStrut(10));
+    mainPanel.add(createLoanPanel());
+    mainPanel.add(Box.createVerticalStrut(10));
 
-        mainPanel.add(createButtonPanel());
+    mainPanel.add(createResultsPanel());
+    mainPanel.add(Box.createVerticalStrut(10));
 
-        add(new JScrollPane(mainPanel));
+    mainPanel.add(createButtonPanel());
 
-        setVisible(true);
-    }
+    JScrollPane scrollPane =
+            new JScrollPane(mainPanel);
+
+    add(scrollPane);
+
+    setVisible(true);
+}
 
     private JPanel createApplicantPanel()
     {
