@@ -27,3 +27,5 @@ target/
 *.tmp
 # XML
 .XML
+#env
+.env

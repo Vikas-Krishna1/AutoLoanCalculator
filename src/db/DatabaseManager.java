@@ -26,23 +26,20 @@ import utils.passwordUtils;
 // ==========================
 public class DatabaseManager
 {
-private static final Dotenv dotenv =
-        Dotenv.configure()
-              .ignoreIfMissing()
-              .load();
-//DB connection details
-//URL format: jdbc:mysql://hostname:port/database_name
-//DB credentials-USER
-//URL
-private static final String URL =
-        dotenv.get("DB_URL");
+private static final Dotenv dotenv = Dotenv.load();
 
-//USER
-private static final String USER =
-       dotenv.get("DB_USER");
-//PASSWORD
-private static final String PASSWORD =
-        dotenv.get("DB_PASSWORD");
+private static final String URL =
+        "jdbc:mysql://"
+        + dotenv.get("MYSQL_HOST")
+        + ":"
+        + dotenv.get("MYSQL_PORT")
+        + "/"
+        + dotenv.get("MYSQL_DATABASE")
+        + "?sslMode=REQUIRED";
+
+private static final String USER = dotenv.get("MYSQL_USER");
+
+private static final String PASSWORD = dotenv.get("MYSQL_PASSWORD");
 //Check if env variables are loaded correctly
 public void printEnvVariables()
 {
@@ -58,6 +55,101 @@ private Connection connect() throws SQLException
 {
     return DriverManager.getConnection(URL, USER, PASSWORD);
 }
+//Initalize Tables
+public void initializeTables() {
+    try (Connection conn = connect();
+         Statement stmt = conn.createStatement()) {
+
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(100) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(20) NOT NULL
+            )
+        """);
+
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS applicant (
+                applicant_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                full_name VARCHAR(100),
+                email VARCHAR(100),
+                phone VARCHAR(20),
+                address VARCHAR(255),
+                date_of_birth VARCHAR(20),
+                ssn VARCHAR(20),
+                employer_name VARCHAR(100),
+                FOREIGN KEY (user_id)
+                    REFERENCES users(user_id)
+                    ON DELETE CASCADE
+            )
+        """);
+
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS vehicle (
+                vehicle_id INT AUTO_INCREMENT PRIMARY KEY,
+                make VARCHAR(50),
+                model VARCHAR(50),
+                year INT
+            )
+        """);
+
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS loan_officer (
+                loan_officer_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                full_name VARCHAR(100),
+                FOREIGN KEY (user_id)
+                    REFERENCES users(user_id)
+                    ON DELETE CASCADE
+            )
+        """);
+
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS loan_application (
+                application_id INT AUTO_INCREMENT PRIMARY KEY,
+                applicant_id INT NOT NULL,
+                vehicle_id INT NOT NULL,
+                auto_price DOUBLE,
+                down_payment DOUBLE,
+                loan_term INT,
+                interest_rate DOUBLE,
+                sales_tax DOUBLE,
+                fees DOUBLE,
+                cash_incentive DOUBLE,
+                loan_amount DOUBLE,
+                monthly_payment DOUBLE,
+                status VARCHAR(20) DEFAULT 'PENDING',
+                application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                assigned_officer_id INT,
+                reviewed_by INT,
+                review_notes TEXT,
+
+                FOREIGN KEY (applicant_id)
+                    REFERENCES applicant(applicant_id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (vehicle_id)
+                    REFERENCES vehicle(vehicle_id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (assigned_officer_id)
+                    REFERENCES loan_officer(loan_officer_id),
+
+                FOREIGN KEY (reviewed_by)
+                    REFERENCES loan_officer(loan_officer_id)
+            )
+        """);
+
+        System.out.println("Tables initialized successfully.");
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+
 //APPICANT  SIDE METHODS=====================================================
 //Get applicnat form Applicant ID=========================
 //Retrieves an applicant's information from the database using their applicant ID

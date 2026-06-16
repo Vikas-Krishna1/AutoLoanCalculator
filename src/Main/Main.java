@@ -20,6 +20,7 @@ public class Main
     {
        // DatabaseManager db = new DatabaseManager();
         DatabaseManager db = new DatabaseManager();
+        db.initializeTables();
         //Check if env variables are loaded correctly
         db.printEnvVariables();
         //Opens the view
